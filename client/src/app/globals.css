@@ -1,33 +1,34 @@
+/* Importar las utilidades de Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
+/* Estilos globales adicionales */
+html,
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  @apply h-full bg-gray-500 text-gray-900;
+  margin: 0;
+  padding: 0;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+#root {
+  @apply flex flex-col min-h-screen;
+}
+
+/* Estilos personalizados */
+a {
+  @apply text-blue-600 hover:text-blue-800 transition-colors;
+}
+
+button {
+  @apply cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+/* Clases específicas para formularios */
+input, select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500;
+}
+
+form {
+  @apply space-y-4;
 }
