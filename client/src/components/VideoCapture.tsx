@@ -21,7 +21,8 @@ const VideoCapture = () => {
             {/* <video  controls autoPlay className="w-full h-[90%] bg-gray-700" >
                 <source src="http://localhost:5000/camera-stream" type="video/mp4" />
             </video> */}
-            <img src='http://localhost:5000/camera-stream'></img>
+            {/*camera flask  */}
+            <img src='http://localhost:5000/flask-stream'></img>
         </div>
         
     );

@@ -35,14 +35,13 @@ b.- ir a client\src\components\VideoCapture.tsx y cambiar la entrada de /camera-
 app.get('/flask-stream', async (req, res) => {
     try {
         const response = await axios({
-            url: 'RUTA_SERVIDOR_FLASK',
+            url: 'http://192.168.100.5:5001/video_feed',//Ruta del servidor de flask (no funciono con localhost)
             method: 'GET',
             responseType: 'stream',
         });
         
         //Tengo entendido que no es necesario el header aca, pero si en el servidor flask
-        //res.setHeader('Content-Type', 'multipart/x-mixed-replace; boundary=--myboundary');
-        
+        res.setHeader('Content-Type', 'multipart/x-mixed-replace; boundary=frame');
         response.data.pipe(res);
         //res.send(response.data);
     } catch (error) {
