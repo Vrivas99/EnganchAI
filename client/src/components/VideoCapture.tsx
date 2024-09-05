@@ -17,8 +17,13 @@ const VideoCapture = () => {
 
     return (
         <div className="flex">
-            <video ref={videoRef} autoPlay className="w-full h-[90%] bg-gray-700" />
+            {/* videoRef usa si o si la webcam directa del pc, de paso, no hay que usar <video>*/}
+            {/* <video  controls autoPlay className="w-full h-[90%] bg-gray-700" >
+                <source src="http://localhost:5000/camera-stream" type="video/mp4" />
+            </video> */}
+            <img src='http://localhost:5000/camera-stream'></img>
         </div>
+        
     );
 };
 
