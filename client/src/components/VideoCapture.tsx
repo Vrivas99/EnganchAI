@@ -16,8 +16,8 @@ const VideoCapture = () => {
     }, []);
 
     return (
-        <div className="flex">
-            <video ref={videoRef} autoPlay className="w-full h-[90%] bg-gray-700" />
+        <div className="flex h-full w-full">
+            <video ref={videoRef} autoPlay className="bg-gray-700" />
         </div>
     );
 };
