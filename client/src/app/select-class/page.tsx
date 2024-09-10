@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Select } from '@headlessui/react'
 
 export default function SelectClass() {
     const router = useRouter();
@@ -13,11 +14,11 @@ export default function SelectClass() {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="bg-white p-8 text-center w-1/4 rounded-lg shadow-lg">
+        <div className="flex justify-center items-center h-full">
+            <div className="bg-white p-8 text-center w-2/4 rounded-lg shadow-lg">
                 <h1 className="text-2xl font-bold mb-4">Seleccionar Clase</h1>
                 <div className="mb-4">
-                    <select
+                    <Select
                         value={selectedClass}
                         onChange={(e) => setSelectedClass(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded"
@@ -25,7 +26,7 @@ export default function SelectClass() {
                         <option value="">Seleccione una clase</option>
                         <option value="class1">Clase 1</option>
                         <option value="class2">Clase 2</option>
-                    </select>
+                    </Select>
                 </div>
                 <div className="mb-4">
                     <select

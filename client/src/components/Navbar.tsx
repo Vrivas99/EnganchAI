@@ -40,7 +40,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="fixed top-0 left-0 w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
+        <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
             {/* Sección izquierda con contadores de engagement */}
             <div className="flex space-x-4">
                 <div className="bg-white text-black shadow-md p-2 rounded">
