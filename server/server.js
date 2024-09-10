@@ -7,9 +7,7 @@ app.use(cors());//Necesario para la conexion con el frontend
 
 let flaskIP = '192.168.100.5:5001';
 
-app.get("/", (req, res)=>{
-    res.send("Hola");
-});
+
 
 /*Deje por mientras un "prototipo" de lo que seria la conexion con flask
 para probarlo: 
@@ -30,6 +28,25 @@ app.get('/flask-stream', async (req, res) => {
     } catch (error) {
         console.error('Error fetching video stream:', error);
         res.status(500).send('Error fetching video stream');
+    }
+});
+
+//Recoger metricas
+app.get('/metrics', async (req, res) => {
+    try {
+        const response = await axios({
+            url: `http://${flaskIP}/metrics`,//Ruta del servidor de flask (no funciono con localhost)
+            method: 'GET',
+            responseType: 'json',
+        });
+        
+        //res.setHeader('Content-Type', 'multipart/x-mixed-replace; boundary=--frame');
+
+        //response.data.pipe(res);
+        res.send(response.data);
+    } catch (error) {
+        console.error('Error get metrics:', error);
+        res.status(500).send('Error get metrics');
     }
 });
 
