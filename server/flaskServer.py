@@ -59,13 +59,10 @@ def generate_frames():
         #Resetear metricas
         metrics["totalPeople"] = 0
         metrics["stateCounts"] = {key: 0 for key in metrics["stateCounts"]}
-        print("Reseteo de metricas: ",metrics)
 
         ret, frame = cap.read()
         if not ret:
             break
-        
-        
 
         # deteccion de objetos de YOLO
         results = face_model(frame)
@@ -90,10 +87,20 @@ def generate_frames():
 
                     #Prediccion de estado
                     engagement_prediction = engagement_model.predict(face_array)
+                    print("engagement prediction: ",engagement_prediction)
 
                     if engagement_prediction.ndim == 2 and engagement_prediction.shape[1] == len(daisee_labels):
                         predicted_index = np.argmax(engagement_prediction)
-                        engagement_state = daisee_labels[predicted_index]
+                        predictedProbabilities = engagement_prediction[predicted_index]#Extraer las probabilidades
+
+                        #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
+                        minConfidence = 0.8#umbral de confianza minimo
+                        if predictedProbabilities[predicted_index] > minConfidence:
+                            print(f"Se cumplio: {predictedProbabilities[predicted_index]} / {minConfidence}")
+                            engagement_state = daisee_labels[predicted_index]
+                        else:
+                            print(f"NO se cumplio: {predictedProbabilities[predicted_index]} / {minConfidence}")
+                            engagement_state = "Engaged"
 
                         metrics["stateCounts"][engagement_state] += 1
 
@@ -114,7 +121,6 @@ def generate_frames():
         
         #Actualizar resultados de las metricas (para que no se envien metricas incompletas en la api)
         metricsAPI = copy.deepcopy(metrics)
-        print("metricas actualizadas: ",metricsAPI)
 
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
