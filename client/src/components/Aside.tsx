@@ -24,7 +24,7 @@ const Aside = () => {
                 // de izquierda a derecha
                 leaveTo="translate-x-full"
                 >
-                <aside className="absolute z-10 h-full right-0 bg-white w-1/4 lg:w-1/3 flex flex-col">
+                <aside className="absolute z-10 h-full right-0 bg-white w-1/4 lg:w-1/3 flex flex-col shadow-lg">
                     <div
                         className="bg-white border-r border-b px-4 h-10 flex justify-between">
                         <span className="text-gray-900 py-2 font-bold">
