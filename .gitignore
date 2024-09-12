@@ -62,3 +62,5 @@ Thumbs.db
 # ML
 .pt
 .h5
+server/modelo_cnn_knn.h5
+server/yolov8n.pt

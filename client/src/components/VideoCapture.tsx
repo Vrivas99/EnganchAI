@@ -30,7 +30,7 @@ const VideoCapture: React.FC = () => {
       }
     }
   }, [isRecording]);
-
+  
   return (
     <div className="flex h-full w-full">
       <video ref={videoRef} autoPlay className="bg-gray-700" />
