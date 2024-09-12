@@ -1,4 +1,4 @@
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -40,6 +40,9 @@ metricsAPI = {
         "Engaged": 0
     }
 }
+
+#Umbral minimo de confianza
+minConfidence = 0.3#umbral de confianza minimo
 
 #Lista de ip que sirven para pruebas
 #http://162.191.81.11:81/cgi-bin/mjpeg?resolution=800x600&quality=1&page=1725548701621&Language=11
@@ -87,19 +90,18 @@ def generate_frames():
 
                     #Prediccion de estado
                     engagement_prediction = engagement_model.predict(face_array)
-                    print("engagement prediction: ",engagement_prediction)
+                    #print("engagement prediction: ",engagement_prediction)
 
                     if engagement_prediction.ndim == 2 and engagement_prediction.shape[1] == len(daisee_labels):
-                        predicted_index = np.argmax(engagement_prediction)
-                        predictedProbabilities = engagement_prediction[predicted_index]#Extraer las probabilidades
+                        predicted_index = np.argmax(engagement_prediction[0])#[0] por que engagement_prediction es un array doble [[x,x,x,x]]
+                        predictedProbabilities = engagement_prediction[0][predicted_index]#Extraer las probabilidades
 
                         #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
-                        minConfidence = 0.8#umbral de confianza minimo
-                        if predictedProbabilities[predicted_index] > minConfidence:
-                            print(f"Se cumplio: {predictedProbabilities[predicted_index]} / {minConfidence}")
+                        if predictedProbabilities > minConfidence:
+                            #print(f"Se cumplio: {predictedProbabilities} / {minConfidence}")
                             engagement_state = daisee_labels[predicted_index]
                         else:
-                            print(f"NO se cumplio: {predictedProbabilities[predicted_index]} / {minConfidence}")
+                            #print(f"NO se cumplio: {predictedProbabilities} / {minConfidence}")
                             engagement_state = "Engaged"
 
                         metrics["stateCounts"][engagement_state] += 1
@@ -110,8 +112,8 @@ def generate_frames():
                         #Bound box
                         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                        #Texto de estado
-                        cv2.putText(frame, f'{engagement_state}', (x1, y1 - 10), 
+                        #Texto de estado + % de probabilidad
+                        cv2.putText(frame, f'{engagement_state} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
         #Convertir el frame a jpg
@@ -134,9 +136,30 @@ def video_feed():
     return Response(generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=--frame')
 
+#Enviar las metricas a express
 @app.route('/metrics', methods=('GET',))
 def getMetrics():
     return jsonify(metricsAPI)
+
+#Modificar la confianza desde express
+@app.route('/setConfidence', methods=['POST'])
+def set_confidence():
+    global minConfidence
+    try:
+        # Obtener el nuevo umbral de confianza desde el cuerpo de la petición
+        data = request.get_json()
+        newConfidence = float(data.get('minConfidence'))
+
+        # Verificar que el valor esté en un rango válido (0.0 a 1.0)
+        if 0 <= newConfidence <= 1:
+            minConfidence = newConfidence
+            return jsonify({"status": "success", "new_confidence": minConfidence}), 200
+        else:
+            return jsonify({"status": "error", "message": "Confidence must be between 0 and 1"}), 400
+
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Invalid confidence value"}), 400
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001)

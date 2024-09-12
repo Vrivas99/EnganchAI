@@ -72,7 +72,27 @@ app.get('/liveMetrics', (req, res) => {
     res.json(currentMetrics);
 });
 
-  
+//Modificar umbral de confianza
+app.post('/setConfidence', async (req, res) => {
+    const newConfidence = 0.4;//req.body.minConfidence;
+
+    //Limitar el umbral
+    if (newConfidence < 0){newConfidence = 0 } 
+    else if (newConfidence > 1){ newConfidence = 1 }
+    
+    try {
+        // Enviar el POST a Flask para cambiar el umbral de confianza
+        const response = await axios.post(`http://${flaskIP}//setConfidence`, {
+            minConfidence: newConfidence
+        });
+
+        // Devolver la respuesta a Express
+        res.status(200).send(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Error cambiando la confianza' });
+    }
+});
 
 app.listen(5000, () => {
     console.log("Server ejecutandose en http://localhost:5000");
