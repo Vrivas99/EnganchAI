@@ -4,14 +4,11 @@ import numpy as np
 import tensorflow as tf
 from ultralytics import YOLO
 import copy#Para copiar las metricas
+from collections import defaultdict#Para almacenar las id's
 #pip install flask opencv-python-headless tensorflow ultralytics
 #Necesita un modelo .h5 que pesa mas del limite de github, descargar para probar
 
 app = Flask(__name__)
-
-daisee_labels = ["Frustrated", "Confused", "Bored", "Engaged"]
-engagement_model = tf.keras.models.load_model("modelo_cnn_knn.h5")
-face_model = YOLO('yolov8n.pt')
 
 # Definir colores para cada estado de engagement
 colorList = {
@@ -20,7 +17,7 @@ colorList = {
     "Confused": (255, 115, 19),   # Naranjo
     "Bored": (95, 205, 228)     # Celeste
 }
-
+#Metricas
 metrics = {
     "totalPeople": 0,
     "stateCounts": {
@@ -30,7 +27,6 @@ metrics = {
         "Engaged": 0
     }
 }
-
 metricsAPI = {
     "totalPeople": 0,
     "stateCounts": {
@@ -41,8 +37,12 @@ metricsAPI = {
     }
 }
 
-#Umbral minimo de confianza
-minConfidence = 0.3#umbral de confianza minimo
+daisee_labels = ["Frustrated", "Confused", "Bored", "Engaged"]
+engagement_model = tf.keras.models.load_model("modelo_cnn_knn.h5")
+yoloModel = YOLO('yolov8n.pt')
+minConfidence = 0.3#umbral minimo de confianza
+# Store the track history
+#trackHistory = defaultdict(lambda: [])
 
 #Lista de ip que sirven para pruebas
 #http://162.191.81.11:81/cgi-bin/mjpeg?resolution=800x600&quality=1&page=1725548701621&Language=11
@@ -68,7 +68,8 @@ def generate_frames():
             break
 
         # deteccion de objetos de YOLO
-        results = face_model(frame)
+        results = yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado
+        #trackIds = results[0].boxes.id.int().cpu().tolist()
 
         #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
         metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0)
@@ -78,6 +79,11 @@ def generate_frames():
                 #Limitar la deteccion solamente a personas
                 if detection.cls[0] == 0:#la id 0 es para personas (id de yolo)
                     #metrics["totalPeople"] += 1
+                    #Debido al filtrador de personas, existe la probabilidad de que no reconosca alguna id
+                    #trackId = -1 #default, con -1 sabre que hubo un error al asignar una id
+                    #trackID = 0
+                    if detection.id is not None:
+                        trackID = int(detection.id.item())
 
                     x1, y1, x2, y2 = map(int, detection.xyxy[0])
 
@@ -113,7 +119,7 @@ def generate_frames():
                         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
                         #Texto de estado + % de probabilidad
-                        cv2.putText(frame, f'{engagement_state} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
+                        cv2.putText(frame, f'ID: {trackID} | {engagement_state} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
         #Convertir el frame a jpg

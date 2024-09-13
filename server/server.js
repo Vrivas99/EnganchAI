@@ -74,7 +74,7 @@ app.get('/liveMetrics', (req, res) => {
 
 //Modificar umbral de confianza
 app.post('/setConfidence', async (req, res) => {
-    const newConfidence = 0.4;//req.body.minConfidence;
+    const newConfidence = 0.5;//req.body.minConfidence;
 
     //Limitar el umbral
     if (newConfidence < 0){newConfidence = 0 } 
