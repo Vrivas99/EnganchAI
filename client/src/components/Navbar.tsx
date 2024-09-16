@@ -4,6 +4,18 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecording } from '@/context/RecordingContext'; // Importa el hook desde el contexto
 import { usePathname } from 'next/navigation'; // Hook para obtener la ruta actual
+//componentes shadcn
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import path from 'path';
+
 
 const Navbar = () => {
     const { isRecording, handleRecording } = useRecording(); // Usa el estado global
@@ -47,8 +59,8 @@ const Navbar = () => {
     return (
         <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
             {/* Sección izquierda con contadores de engagement */}
-            <div className="flex space-x-4">
-                <div className="bg-white text-black shadow-md p-2 rounded w-32">
+            <div className="flex space-x-4 md:text-sm xl:text-base">
+                <div className="bg-white text-black shadow-md p-2 rounded sm:w-20 md:w-32">
                     <span className="block">Frustrated: {engagementCounts.frustrated}</span>
                     <div className="w-full h-1 bg-red-500 mt-1"></div>
                 </div>
@@ -67,15 +79,42 @@ const Navbar = () => {
             </div>
 
             {/* Sección derecha con botón de captura y temporizador */}
-            <div className="flex items-center space-x-4">
-                <span className="text-lg font-semibold text-black">Tiempo transcurrido: {formatTime(timer)}</span>
+            <div className="flex items-center space-x-2">
+                <div className='flex flex-col md:text-sm xl:text-base font-semibold text-black'>
+                    <span className="flex justify-end">Tiempo transcurrido:</span>
+                    <span className='flex justify-end'>{formatTime(timer)}</span>
+                </div>
                 <button
                     onClick={startRecording}
                     disabled={pathname !== '/video'} // Desactiva el botón si no estás en la página de video
-                    className={`px-4 py-2 rounded ${isRecording ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'} ${pathname !== '/video' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`md:text-sm xl:text-base px-4 py-2 rounded ${isRecording ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'} ${pathname !== '/video' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {isRecording ? 'Finalizar Captura' : 'Iniciar Captura'}
                 </button>
+                {/* Ocultar avatar en login */}
+                {pathname === '/login' ? null :
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Avatar>
+                                <AvatarImage src="https://picsum.photos/200/300" />
+                                <AvatarFallback className='bg-black'>PR</AvatarFallback>
+                            </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+
+                            <DropdownMenuLabel>
+                                Mi cuenta
+                            </DropdownMenuLabel>
+
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem>
+                                <Link href="/" className='text-neutral-900'>Cerrar Sesión</Link>
+                            </DropdownMenuItem>
+
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                }
             </div>
         </nav>
     );
