@@ -1,6 +1,4 @@
 import VideoCapture from '@/components/VideoCapture';
-import { useState } from 'react';
-
 
 export default function Video() {
 

@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
@@ -71,21 +72,11 @@ export default function Login() {
                     <button
                         type="submit"
                         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-                        
+
                     >
                         Iniciar sesión
                     </button>
                 </form>
-
-                {/* Toast container */}
-                <ToastContainer 
-                    autoClose={2000}
-                    position='bottom-center'
-                    newestOnTop={false}
-                    rtl={false}
-                    closeOnClick
-
-                />
             </div>
         </div>
     );

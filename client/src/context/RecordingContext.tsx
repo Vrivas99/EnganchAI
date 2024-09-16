@@ -5,6 +5,7 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 // Define la interfaz para el contexto
 interface RecordingContextType {
   isRecording: boolean;
+  setIsRecording: (isRecording: boolean) => void;
   handleRecording: () => void;
 }
 
@@ -29,7 +30,7 @@ export const RecordingProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <RecordingContext.Provider value={{ isRecording, handleRecording }}>
+    <RecordingContext.Provider value={{ isRecording,setIsRecording, handleRecording }}>
       {children}
     </RecordingContext.Provider>
   );
