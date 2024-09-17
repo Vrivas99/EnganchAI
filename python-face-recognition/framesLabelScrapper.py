@@ -15,6 +15,9 @@ dataset_folder = os.path.expanduser('~/engagement_model_folder/lib/daisee/DAiSEE
 
 # Cargar Labels con pandas
 metadata = pd.read_csv(metadata_path)
+# El csv original viene con " e s p a c i o s " basicamente esto arregla un problema en que
+# algunos registros tienen columna N/A en frustration.
+metadata.columns = metadata.columns.str.strip()
 
 # Ver Labels para comprobar que es el archivo correcto
 print(metadata.head())
@@ -65,6 +68,6 @@ for idx, row in metadata.iterrows():
     else:
         print(f"Folder missing for {clip_id}")
 
-    print(f"Expecting folder path: {folder_path}")
+    #print(f"Expecting folder path: {folder_path}")
     parent_folder = os.path.dirname(folder_path)
-    print(f"Directory contents: {os.listdir(parent_folder) if os.path.exists(parent_folder) else 'Parent folder missing'}")
+    #print(f"Directory contents: {os.listdir(parent_folder) if os.path.exists(parent_folder) else 'Parent folder missing'}")
