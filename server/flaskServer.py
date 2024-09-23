@@ -118,7 +118,7 @@ def displayFrames():
                 continue
 
             # deteccion de objetos de YOLO
-            results = yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado
+            results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado
 
             #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
             metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0)
@@ -128,57 +128,57 @@ def displayFrames():
                     #Filtro de confianza (para detectar objetos, yolo)
                     #detection.conf.cpu().numpy() > X | import numpy
                     #Limitar la deteccion solamente a personas
-                    if detection.cls[0] == 0:#la id 0 es para personas (id de yolo)
-                        personDetected = True
+                    #if detection.cls[0] == 0:#la id 0 es para personas (id de yolo)
+                    personDetected = True
 
-                        if detection.id is not None:
-                            yoloTrackID = int(detection.id.item())
+                    if detection.id is not None:
+                        yoloTrackID = int(detection.id.item())
 
-                            #Si el iD de yolo no esta en mi variable customisada, asignar una
-                            if yoloTrackID not in activePersonIds:
-                                activePersonIds[yoloTrackID] = personIdCounter
-                                personIdCounter +=1
+                        #Si el iD de yolo no esta en mi variable customisada, asignar una
+                        if yoloTrackID not in activePersonIds:
+                            activePersonIds[yoloTrackID] = personIdCounter
+                            personIdCounter +=1
 
-                            #Obtenemos el ID personalizado de la persona
-                            trackID = activePersonIds[yoloTrackID]
+                        #Obtenemos el ID personalizado de la persona
+                        trackID = activePersonIds[yoloTrackID]
 
-                            #Coordenadas para el boundbox
-                            x1, y1, x2, y2 = map(int, detection.xyxy[0])
+                        #Coordenadas para el boundbox
+                        x1, y1, x2, y2 = map(int, detection.xyxy[0])
 
-                            face = frame[y1:y2, x1:x2]
-                            if face.size == 0:
-                                continue
+                        face = frame[y1:y2, x1:x2]
+                        if face.size == 0:
+                            continue
 
-                            face_resized = cv2.resize(face, (224, 224))
-                            face_array = np.expand_dims(face_resized, axis=0) / 255.0
+                        face_resized = cv2.resize(face, (224, 224))
+                        face_array = np.expand_dims(face_resized, axis=0) / 255.0
 
-                            #Prediccion de estado
-                            engagement_prediction = engagement_model.predict(face_array)
-                            #print("engagement prediction: ",engagement_prediction)
+                        #Prediccion de estado
+                        engagement_prediction = engagement_model.predict(face_array)
+                        #print("engagement prediction: ",engagement_prediction)
 
-                            if engagement_prediction.ndim == 2 and engagement_prediction.shape[1] == len(daisee_labels):
-                                predicted_index = np.argmax(engagement_prediction[0])#[0] por que engagement_prediction es un array doble [[x,x,x,x]]
-                                predictedProbabilities = engagement_prediction[0][predicted_index]#Extraer las probabilidades
+                        if engagement_prediction.ndim == 2 and engagement_prediction.shape[1] == len(daisee_labels):
+                            predicted_index = np.argmax(engagement_prediction[0])#[0] por que engagement_prediction es un array doble [[x,x,x,x]]
+                            predictedProbabilities = engagement_prediction[0][predicted_index]#Extraer las probabilidades
 
-                                #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
-                                if predictedProbabilities > minConfidence:
-                                    #print(f"Se cumplio: {predictedProbabilities} / {minConfidence}")
-                                    engagement_state = daisee_labels[predicted_index]
-                                else:
-                                    #print(f"NO se cumplio: {predictedProbabilities} / {minConfidence}")
-                                    engagement_state = "Engaged"
+                            #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
+                            if predictedProbabilities > minConfidence:
+                                #print(f"Se cumplio: {predictedProbabilities} / {minConfidence}")
+                                engagement_state = daisee_labels[predicted_index]
+                            else:
+                                #print(f"NO se cumplio: {predictedProbabilities} / {minConfidence}")
+                                engagement_state = "Engaged"
 
-                                metrics["stateCounts"][engagement_state] += 1
+                            metrics["stateCounts"][engagement_state] += 1
 
-                                #Seleccionar el color correspondiente
-                                color = colorList.get(engagement_state, (255, 255, 255))  # Blanco por defecto si no se encuentra
+                            #Seleccionar el color correspondiente
+                            color = colorList.get(engagement_state, (255, 255, 255))  # Blanco por defecto si no se encuentra
 
-                                #Bound box
-                                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                            #Bound box
+                            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                                #Texto de estado + % de probabilidad
-                                cv2.putText(frame, f'ID: {trackID} | {engagement_state} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
-                                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
+                            #Texto de estado + % de probabilidad
+                            cv2.putText(frame, f'ID: {trackID} | {engagement_state} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
                                 
                                 
 
