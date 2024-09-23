@@ -7,7 +7,7 @@ app.use(cors());//Necesario para la conexion con el frontend
 
 let flaskIP = '192.168.100.5:5001';
 
-
+let currentMetrics = null
 
 /*Deje por mientras un "prototipo" de lo que seria la conexion con flask
 para probarlo: 
@@ -50,9 +50,53 @@ app.get('/metrics', async (req, res) => {
     }
 });
 
-  
+//v2
+const updateMetrics = async () => {
+    try {
+        const response = await axios({
+            url: `http://${flaskIP}/metrics`, // Ruta del servidor Flask
+            method: 'GET',
+            responseType: 'json',
+        });
+        currentMetrics = response.data; // Actualiza las métricas con los datos recibidos
+        console.log('Metrics updated:', currentMetrics); // Opcional: Verificar en la consola
+    } catch (error) {
+        console.error('Error fetching metrics:', error);
+    }
+};
+
+// Llamar a la función updateMetrics cada 2 segundos
+setInterval(updateMetrics, 500);
+
+app.get('/liveMetrics', (req, res) => {
+    res.json(currentMetrics);
+});
+
+//Modificar umbral de confianza
+app.post('/setConfidence', async (req, res) => {
+    const newConfidence = 0.5;//req.body.minConfidence;
+
+    //Limitar el umbral
+    if (newConfidence < 0){newConfidence = 0 } 
+    else if (newConfidence > 1){ newConfidence = 1 }
+    
+    try {
+        // Enviar el POST a Flask para cambiar el umbral de confianza
+        const response = await axios.post(`http://${flaskIP}//setConfidence`, {
+            minConfidence: newConfidence
+        });
+
+        // Devolver la respuesta a Express
+        res.status(200).send(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Error cambiando la confianza' });
+    }
+});
 
 app.listen(5000, () => {
     console.log("Server ejecutandose en http://localhost:5000");
     console.log("flask stream API: http://localhost:5000/flask-stream")
+    console.log("flask metrics API: http://localhost:5000/metrics")
+    console.log("flask metrics API: http://localhost:5000/liveMetrics")
 });
