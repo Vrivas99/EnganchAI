@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecording } from '@/context/RecordingContext'; // Importa el hook desde el contexto
 import { usePathname } from 'next/navigation'; // Hook para obtener la ruta actual
-//componentes shadcn
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// Componentes shadcn
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,40 +13,41 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import path from 'path';
-
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
     const { isRecording, handleRecording } = useRecording(); // Usa el estado global
     const [timer, setTimer] = useState(0);
     const pathname = usePathname(); // Obtener la ruta actual
 
-    const [engagementCounts, setEngagementCounts] = useState({
+    const [engagementCounts] = useState({
         frustrated: 0,
         confused: 0,
         bored: 0,
         engaged: 0,
     });
 
+    // Efecto para manejar el temporizador
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
+
         if (isRecording) {
             interval = setInterval(() => {
                 setTimer((prevTime) => prevTime + 1);
             }, 1000);
-        } else if (!isRecording && timer !== 0) {
+        } else {
             clearInterval(interval!);
         }
+
         return () => clearInterval(interval!);
-    }, [isRecording, timer]);
+    }, [isRecording]);
 
     // Reinicia el temporizador al comenzar una nueva captura
     const startRecording = () => {
-        handleRecording(); // Cambia el estado de grabación
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
         }
+        handleRecording(); // Cambia el estado de grabación
     };
 
     // Formato del tiempo
@@ -54,6 +55,14 @@ const Navbar = () => {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    // Lógica de cierre de sesión
+    const handleLogout = () => {
+        if (isRecording) {
+            handleRecording(); // Detiene la grabación si está activa
+        }
+        // Aquí podrías añadir más lógica, como limpiar sesiones o redirigir a la página de login
     };
 
     return (
@@ -80,9 +89,9 @@ const Navbar = () => {
 
             {/* Sección derecha con botón de captura y temporizador */}
             <div className="flex items-center space-x-2">
-                <div className='flex flex-col md:text-sm xl:text-base font-semibold text-black'>
+                <div className="flex flex-col md:text-sm xl:text-base font-semibold text-black">
                     <span className="flex justify-end">Tiempo transcurrido:</span>
-                    <span className='flex justify-end'>{formatTime(timer)}</span>
+                    <span className="flex justify-end">{formatTime(timer)}</span>
                 </div>
                 <button
                     onClick={startRecording}
@@ -91,30 +100,27 @@ const Navbar = () => {
                 >
                     {isRecording ? 'Finalizar Captura' : 'Iniciar Captura'}
                 </button>
+
                 {/* Ocultar avatar en login */}
-                {pathname === '/login' ? null :
+                {pathname === '/login' ? null : (
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Avatar>
                                 <AvatarImage src="https://picsum.photos/200/300" />
-                                <AvatarFallback className='bg-black'>PR</AvatarFallback>
+                                <AvatarFallback className="bg-black">PR</AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-
-                            <DropdownMenuLabel>
-                                Mi cuenta
-                            </DropdownMenuLabel>
-
+                            <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-
                             <DropdownMenuItem>
-                                <Link href="/" className='text-neutral-900'>Cerrar Sesión</Link>
+                                <Link href="/" onClick={handleLogout} className="text-neutral-900">
+                                    Cerrar Sesión
+                                </Link>
                             </DropdownMenuItem>
-
                         </DropdownMenuContent>
                     </DropdownMenu>
-                }
+                )}
             </div>
         </nav>
     );
