@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 app.use(cors());//Necesario para la conexion con el frontend
 
-let flaskIP = '192.168.100.5:5001';
+let flaskIP = '127.0.0.1:5001';
 
 
 
