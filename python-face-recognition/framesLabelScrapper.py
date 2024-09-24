@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from PIL import Image
+import csv
 
 """
 Este script se utiliza una vez se hayan extraido los frames de c/video , basicamente cuando ya se extrajeron los 
@@ -10,8 +11,8 @@ el video de donde se extrajeron los frames (solo que en vez de buscar el video b
 
 # Ocupar Absolute Path para trabajar desde root del dataset
 # Apuntar al mapeo que queremos ejemplo [Train folder, Train CSV] <-> [Test folder, Test CSV]
-metadata_path = os.path.expanduser('~/engagement_model_folder/lib/daisee/DAiSEE/Labels/TrainLabels.csv')
-dataset_folder = os.path.expanduser('~/engagement_model_folder/lib/daisee/DAiSEE/DataSet/Train')
+metadata_path = os.path.expanduser('~/engagement_model_folder/lib/daisee/DAiSEE/Labels/TestLabels.csv')
+dataset_folder = os.path.expanduser('~/engagement_model_folder/lib/daisee/DAiSEE/DataSet/Test')
 
 # Cargar Labels con pandas
 metadata = pd.read_csv(metadata_path)
@@ -19,55 +20,62 @@ metadata = pd.read_csv(metadata_path)
 # algunos registros tienen columna N/A en frustration.
 metadata.columns = metadata.columns.str.strip()
 
+# Path para el csv post labeling de cada frame
+output_csv_path = os.path.expanduser('~/engagement_model_folder/lib/daisee/DAiSEE/Labels/framesTestLabels.csv')
+
 # Ver Labels para comprobar que es el archivo correcto
 print(metadata.head())
 
-# Quitar extension de archivo 
-def remove_extension(filename):
-    return os.path.splitext(filename)[0]
+with open(output_csv_path,mode='w',newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['ImagePath', 'Boredom', 'Engagement', 'Confusion', 'Frustration'])  # CSV header
 
+    # Quitar extension de archivo 
+    def remove_extension(filename):
+        return os.path.splitext(filename)[0]
 
-# Recorremos el csv asociando 
-for idx, row in metadata.iterrows():
-    clip_id = remove_extension(row['ClipID']) # Esto quita extensiones .avi .mp4 etc...
-    labels = {
-        'Boredom': row.get('Boredom', 'N/A'),
-        'Engagement': row.get('Engagement', 'N/A'),
-        'Confusion': row.get('Confusion', 'N/A'),
-        'Frustration': row.get('Frustration', 'N/A')
-    }
+    can = 0
+    # Recorremos el csv asociando 
+    for idx, row in metadata.iterrows():
+        clip_id = remove_extension(row['ClipID']) # Esto quita extensiones .avi .mp4 etc...
+        labels = {
+            'Boredom': row.get('Boredom', 'N/A'),
+            'Engagement': row.get('Engagement', 'N/A'),
+            'Confusion': row.get('Confusion', 'N/A'),
+            'Frustration': row.get('Frustration', 'N/A')
+        }
 
-    # Construimos paths a la carpeta que buscamos segun el registro csv
-    folder_path = os.path.join(dataset_folder, clip_id[:6], clip_id)
+        # Construimos paths a la carpeta que buscamos segun el registro csv
+        folder_path = os.path.join(dataset_folder, clip_id[:6], clip_id)
 
-    # Debugging: Print the constructed folder path
-    # print(f"Checking folder path: {folder_path}")
+        # Debugging: Print the constructed folder path
+        # print(f"Checking folder path: {folder_path}")
 
-    if os.path.exists(folder_path):
-        # List all jpg files in the folder
-        image_files = [f for f in os.listdir(folder_path) if f.endswith('.jpg')]
-        
-        if not image_files:
-            print(f"No .jpg files found in {folder_path}")  # Debug print
+        if os.path.exists(folder_path):
+            # List all jpg files in the folder
+            image_files = [f for f in os.listdir(folder_path) if f.endswith('.jpg')]
             
-        for image_file in image_files:
-            file_path = os.path.join(folder_path, image_file)
-            
-            try:
-                with Image.open(file_path) as img:
+            if not image_files:
+                print(f"No .jpg files found in {folder_path}")  # Debug print
+                
+            for image_file in image_files:
+                file_path = os.path.join(folder_path, image_file)
+                
+                try:
+                    with Image.open(file_path) as img:
 
-                    #Example: Print image size and label
-                    print(f"Processing image: {file_path}")
-                    print(f"Size: {img.size}, Labels - {labels}")
-                    
-                    # Here you can save labels with images or use them directly for training
-                    # e.g., save images and their labels into a format suitable for your ML framework
-                    
-            except Exception as e:
-                print(f"Error processing image {file_path}: {e}")
-    else:
-        print(f"Folder missing for {clip_id}")
+                        # If the image was successfully opened, we can write the info to the CSV
+                        writer.writerow([file_path, labels['Boredom'], labels['Engagement'], labels['Confusion'], labels['Frustration']])
+                        can+=1
+                        # Here you can save labels with images or use them directly for training
+                        # e.g., save images and their labels into a format suitable for your ML framework
+                        
+                except Exception as e:
+                    print(f"Error processing image {file_path}: {e}")
+        else:
+            print(f"Folder missing for {clip_id}")
 
-    #print(f"Expecting folder path: {folder_path}")
-    parent_folder = os.path.dirname(folder_path)
-    #print(f"Directory contents: {os.listdir(parent_folder) if os.path.exists(parent_folder) else 'Parent folder missing'}")
+        #print(f"Expecting folder path: {folder_path}")
+        parent_folder = os.path.dirname(folder_path)
+        #print(f"Directory contents: {os.listdir(parent_folder) if os.path.exists(parent_folder) else 'Parent folder missing'}")
+    print("Imagenes labeliadas : " + str(can))
