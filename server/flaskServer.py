@@ -47,7 +47,7 @@ metricsAPI = {
 
 daisee_labels = ["Frustrated", "Confused", "Bored", "Engaged"]
 engagement_model = tf.keras.models.load_model("modelo_cnn_knn.h5")
-yoloModel = YOLO('yolov8n.pt')
+yoloModel = YOLO('yolov8n.pt')#yolov8n-face.pt
 minConfidence = 0.3#umbral minimo de confianza
 #Contador de ID
 personIdCounter = 1
@@ -117,8 +117,10 @@ def displayFrames():
             if frameCount % (fpsStream // fpsTarget) != 0:
                 continue
 
+            frameCount = 0
+
             # deteccion de objetos de YOLO
-            results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado
+            results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado, classes=0 para personas
 
             #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
             metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0)
