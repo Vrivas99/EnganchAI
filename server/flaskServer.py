@@ -57,7 +57,8 @@ activePersonIds = {}
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-cap = cv2.VideoCapture(f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0")
+camLink = "TestVideos/1.webm"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 #cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)#Aumentar tiempo de espera para reconexion a 5 segundos
 
@@ -69,7 +70,7 @@ fpsStream = 10#FPS de la transmision (ver con cap.get(cv2.CAP_PROP_FPS))
 if not cap.isOpened():
     raise Exception("Error: Could not open video stream.")
 else:
-    print("\n///////\nstream in http://192.168.100.5:5001/video_feed \n Metrics: http://192.168.100.5:5001/metrics \n///////\n")
+    print("\n///////\nstream in http://127.0.0.1:5001/video_feed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
 
 #Limpiar el contador de ID cuando no se detecten mas personas
 def resetIDCounter():
@@ -78,8 +79,8 @@ def resetIDCounter():
     activePersonIds = {}
 
 def receiveStream():
-    global frameCount
-    cap = cv2.VideoCapture(f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0")
+    global frameCount, fpsStream
+    cap = cv2.VideoCapture(camLink)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
     ret, frame = cap.read()
     frame = cv2.resize(frame, (640, 480))#Tamaño de entrada (debe coincidir con la redimension dentro del while)
@@ -87,10 +88,14 @@ def receiveStream():
     while ret:
         ret, frame = cap.read()
         if not ret:
+            #Poner en bucle un video mp4
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Volver al primer frame
             continue
 
         #Poner los fps del stream en la imagen a enviar
         fps = cap.get(cv2.CAP_PROP_FPS)
+        fpsStream = fps
+        
         #FPS del stream
         cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
 
@@ -243,4 +248,4 @@ if __name__ == "__main__":
     p2 = threading.Thread(target=displayFrames)
     p1.start()
     p2.start()
-    app.run(host='0.0.0.0', port=5001, debug=False)
+    app.run(host='127.0.0.1', port=5001, debug=False)
