@@ -45,6 +45,7 @@ metricsAPI = {
     }
 }
 
+
 daisee_labels = ["Frustrated", "Confused", "Bored", "Engaged"]
 engagement_model = tf.keras.models.load_model("modelo_cnn_knn.h5")
 yoloModel = YOLO('yolov8n.pt')
@@ -53,11 +54,17 @@ minConfidence = 0.3#umbral minimo de confianza
 personIdCounter = 1
 activePersonIds = {}
 
+#Lista de ip que sirven para pruebas
+#http://162.191.81.11:81/cgi-bin/mjpeg?resolution=800x600&quality=1&page=1725548701621&Language=11
+#http://129.125.136.20/mjpg/video.mjpg?resolution=800x600&quality=1&page=1725548701621&Language=11
+
 #Datos de la camara
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
+
 cap = cv2.VideoCapture(f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0")
+
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 #cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)#Aumentar tiempo de espera para reconexion a 5 segundos
 
@@ -65,6 +72,7 @@ cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran 
 frameCount = 0
 fpsTarget = 2#Cantidad de fps que quiero procesar
 fpsStream = 10#FPS de la transmision (ver con cap.get(cv2.CAP_PROP_FPS))
+
 
 if not cap.isOpened():
     raise Exception("Error: Could not open video stream.")
