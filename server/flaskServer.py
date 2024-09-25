@@ -35,10 +35,6 @@ metrics = {
 #http://162.191.81.11:81/cgi-bin/mjpeg?resolution=800x600&quality=1&page=1725548701621&Language=11
 #http://129.125.136.20/mjpg/video.mjpg?resolution=800x600&quality=1&page=1725548701621&Language=11
 
-<<<<<<< Updated upstream
-#Los argumentos de la url son necesarios para que la transmision no sea tan pesada y no caduque la conexion
-cap = cv2.VideoCapture("http://129.125.136.20/mjpg/video.mjpg?resolution=800x600&quality=1&page=1725548701621&Language=11")
-=======
 #Datos de la camara
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
@@ -51,7 +47,6 @@ cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran 
 frameCount = 0
 fpsTarget = 2#Cantidad de fps que quiero procesar
 fpsStream = 10#FPS de la transmision (ver con cap.get(cv2.CAP_PROP_FPS))
->>>>>>> Stashed changes
 
 if not cap.isOpened():
     raise Exception("Error: Could not open video stream.")
