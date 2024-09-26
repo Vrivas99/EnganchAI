@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecording } from '@/context/RecordingContext'; // Importa el hook desde el contexto
 import { usePathname } from 'next/navigation'; // Hook para obtener la ruta actual
-// Componentes shadcn
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -20,12 +19,49 @@ const Navbar = () => {
     const [timer, setTimer] = useState(0);
     const pathname = usePathname(); // Obtener la ruta actual
 
-    const [engagementCounts] = useState({
+    // Estado para las métricas de engagement
+    const [engagementCounts, setEngagementCounts] = useState({
         frustrated: 0,
         confused: 0,
         bored: 0,
         engaged: 0,
     });
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+
+        const fetchMetrics = async () => {
+            try {
+                const response = await fetch('http://localhost:5001/metrics'); // Cambia a la URL correcta de tu servidor
+                if (!response.ok) {
+                    throw new Error('Error fetching metrics');
+                }
+                const data = await response.json();
+                console.log('Fetched data:', data); // Verifica los datos recibidos
+                setEngagementCounts({
+                    frustrated: data.stateCounts.Frustrated || 0,
+                    confused: data.stateCounts.Confused || 0,
+                    bored: data.stateCounts.Bored || 0,
+                    engaged: data.stateCounts.Engaged || 0,
+                });
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+            }
+        };
+
+        if (isRecording) {
+            // Si está grabando, realiza el fetch cada 2 segundos
+            fetchMetrics(); // Llama inmediatamente al iniciar
+            interval = setInterval(fetchMetrics, 500); // Actualiza cada 2 segundos
+        }
+
+        return () => {
+            // Limpia el intervalo cuando deje de grabar o cuando el componente se desmonte
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [isRecording]); // Solo ejecuta el efecto cuando cambie `isRecording`
 
     // Efecto para manejar el temporizador
     useEffect(() => {
@@ -42,7 +78,6 @@ const Navbar = () => {
         return () => clearInterval(interval!);
     }, [isRecording]);
 
-    // Reinicia el temporizador al comenzar una nueva captura
     const startRecording = () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
@@ -50,24 +85,20 @@ const Navbar = () => {
         handleRecording(); // Cambia el estado de grabación
     };
 
-    // Formato del tiempo
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // Lógica de cierre de sesión
     const handleLogout = () => {
         if (isRecording) {
             handleRecording(); // Detiene la grabación si está activa
         }
-        // Aquí podrías añadir más lógica, como limpiar sesiones o redirigir a la página de login
     };
 
     return (
         <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
-            {/* Sección izquierda con contadores de engagement */}
             <div className="flex space-x-4 md:text-sm xl:text-base">
                 <div className="bg-white text-black shadow-md p-2 rounded sm:w-20 md:w-32">
                     <span className="block">Frustrated: {engagementCounts.frustrated}</span>
@@ -87,7 +118,6 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Sección derecha con botón de captura y temporizador */}
             <div className="flex items-center space-x-2">
                 <div className="flex flex-col md:text-sm xl:text-base font-semibold text-black">
                     <span className="flex justify-end">Tiempo transcurrido:</span>
@@ -95,14 +125,13 @@ const Navbar = () => {
                 </div>
                 <button
                     onClick={startRecording}
-                    disabled={pathname !== '/video'} // Desactiva el botón si no estás en la página de video
+                    disabled={pathname !== '/video'}
                     className={`md:text-sm xl:text-base px-4 py-2 rounded ${isRecording ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'} ${pathname !== '/video' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {isRecording ? 'Finalizar Captura' : 'Iniciar Captura'}
                 </button>
 
-                {/* Ocultar avatar en login */}
-                {pathname === '/login' ? null : (
+                {pathname === '/login' || '/'  ? null : (
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Avatar>
