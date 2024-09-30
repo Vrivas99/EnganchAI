@@ -52,7 +52,7 @@ activePersonIds = {}
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-camLink = f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"#"TestVideos/3.mp4"
+camLink = "TestVideos/3.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 
