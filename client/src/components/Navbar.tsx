@@ -52,7 +52,7 @@ const Navbar = () => {
         if (isRecording) {
             // Si está grabando, realiza el fetch cada 2 segundos
             fetchMetrics(); // Llama inmediatamente al iniciar
-            interval = setInterval(fetchMetrics, 500); // Actualiza cada 2 segundos
+            interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1 segundos
         }
 
         return () => {
