@@ -65,7 +65,7 @@ const updateMetrics = async () => {
     }
 };
 
-// Llamar a la función updateMetrics cada 2 segundos
+// Llamar a la función updateMetrics cada 1/2 segundos
 setInterval(updateMetrics, 500);
 
 app.get('/liveMetrics', (req, res) => {

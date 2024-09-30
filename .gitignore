@@ -69,4 +69,4 @@ Thumbs.db
 server/modelo_cnn_knn.h5
 server/yolov8n.pt
 server/modelo_cnn_knn.h5
-server/yolov8n.pt
+/server/TestVideos
