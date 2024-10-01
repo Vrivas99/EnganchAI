@@ -32,7 +32,7 @@ const Navbar = () => {
 
         const fetchMetrics = async () => {
             try {
-                const response = await fetch('http://localhost:5001/metrics'); // Cambia a la URL correcta de tu servidor
+                const response = await fetch('http://localhost:5000/metrics'); // Cambia a la URL correcta de tu servidor
                 if (!response.ok) {
                     throw new Error('Error fetching metrics');
                 }
@@ -52,7 +52,7 @@ const Navbar = () => {
         if (isRecording) {
             // Si está grabando, realiza el fetch cada 2 segundos
             fetchMetrics(); // Llama inmediatamente al iniciar
-            interval = setInterval(fetchMetrics, 500); // Actualiza cada 2 segundos
+            interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1 segundos
         }
 
         return () => {

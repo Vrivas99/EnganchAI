@@ -12,8 +12,8 @@ const VideoCapture: React.FC = () => {
 
   useEffect(() => {
     if (isRecording && videoRef.current) {
-      // Establece la URL de la transmisión de video desde Flask
-      videoRef.current.src = 'http://localhost:5001/video_feed';
+      // Establece la URL de la transmisión de video desde el backend
+      videoRef.current.src = 'http://localhost:5000/flaskStream';
       
       // Verifica si hay un error al cargar el stream
       videoRef.current.onerror = () => {

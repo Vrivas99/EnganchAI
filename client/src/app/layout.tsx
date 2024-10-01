@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Aside from "@/components/Aside";
 import AiConfig from "@/components/AiConfig";
 import { RecordingProvider } from "@/context/RecordingContext";
+import { MetricsProvider } from '@/context/MetricsContext'; // Importa el MetricsProvider
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -25,22 +26,24 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <RecordingProvider>
-          <Navbar />
-          <main className="relative flex-1 flex overflow-hidden">
-            <Aside />
-            <AiConfig />
-            <div className="flex-1 overflow-auto">
-              {children}
-            </div>
-          </main>
-          {/* Toast container */}
-          <ToastContainer
-            autoClose={2000}
-            position='bottom-center'
-            newestOnTop={false}
-            rtl={false}
-            closeOnClick
-          />
+          <MetricsProvider>
+            <Navbar />
+            <main className="relative flex-1 flex overflow-hidden">
+              <Aside />
+              <AiConfig />
+              <div className="flex-1 overflow-auto">
+                {children}
+              </div>
+            </main>
+            {/* Toast container */}
+            <ToastContainer
+              autoClose={2000}
+              position='bottom-center'
+              newestOnTop={false}
+              rtl={false}
+              closeOnClick
+            />
+          </MetricsProvider>
         </RecordingProvider>
       </body>
     </html>
