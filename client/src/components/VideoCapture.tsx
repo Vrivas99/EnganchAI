@@ -12,6 +12,9 @@ const VideoCapture: React.FC = () => {
 
   useEffect(() => {
     if (isRecording && videoRef.current) {
+      // Se establece el estado de error en falso para cada inicialización de la grabación
+      setStreamError(false);
+
       // Establece la URL de la transmisión de video desde el backend
       videoRef.current.src = 'http://localhost:5000/flaskStream';
       
@@ -24,11 +27,17 @@ const VideoCapture: React.FC = () => {
       videoRef.current.src = '';
       setStreamError(false);
     }
+
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.onerror = null;
+      }
+    };
   }, [isRecording]);
 
   useEffect(() => {
     if (isRecording && streamError) {
-      // Solo muestra el toast si estás grabando y hay un error en la conexión al stream
+      // Solo muestra el toast si está grabando y hay un error en la conexión
       toast.error('Error: No se pudo conectar con el stream de video.');
     }
   }, [isRecording, streamError]);
