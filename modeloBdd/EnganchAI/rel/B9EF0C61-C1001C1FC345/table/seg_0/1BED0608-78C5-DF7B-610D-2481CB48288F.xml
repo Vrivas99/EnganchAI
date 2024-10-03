@@ -1,0 +1,79 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="1BED0608-78C5-DF7B-610D-2481CB48288F" name="METRICAS">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>1F17C4B6-D0F8-F7B9-9434-A3AFFE40FBC4</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="IdMetrica" id="9B7E0933-8E90-68B0-450C-7D6366CD5B6D">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>F906920D-D5EE-CE86-C198-9C61BAD2B720</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Json" id="416CC3FD-998A-9F44-219E-E592CF27F930">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>19F3281E-84E2-9BB5-37E0-864F7F781E4E</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Asignaciones_USUARIOS(PROFESORES)_Id" id="FD5E745A-1641-561D-910F-E1EB4678D983">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-03 13:23:23 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="16752D66-FB98-30C6-D301-443E5C4769A4" referredColumn="03B9B0A6-F87B-06E4-1718-AD6B77FB2A01"/>
+</associations>
+</Column>
+<Column name="Asignaciones_SALAS(CAMARAS)_Id" id="CD00A6FB-CF23-39F0-121F-955837B57ADE">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-03 13:23:23 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="16752D66-FB98-30C6-D301-443E5C4769A4" referredColumn="6C31794E-8ADC-2C6C-F566-4FF9AD628314"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="C2836CE9-468F-4520-FCF9-D266B7259088" name="METRICAS_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>DB485950-784F-14F5-B482-7D06EB98812A</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="9B7E0933-8E90-68B0-450C-7D6366CD5B6D"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="F73274DC-2599-7081-EDE0-3CBAB16F4C81" name="METRICAS_Asignaciones_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-03 13:23:23 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="FD5E745A-1641-561D-910F-E1EB4678D983"/>
+<colUsage columnID="CD00A6FB-CF23-39F0-121F-955837B57ADE"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRecording } from '@/context/RecordingContext'; // Importa el hook desde el contexto
+import { useMetrics } from '@/context/MetricsContext';
 import { usePathname } from 'next/navigation'; // Hook para obtener la ruta actual
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -13,57 +14,25 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner"
 
 const Navbar = () => {
     const { isRecording, handleRecording } = useRecording(); // Usa el estado global
     const [timer, setTimer] = useState(0);
+    const [toastShown, setToastShown] = useState(false);
     const pathname = usePathname(); // Obtener la ruta actual
+    const { metrics } = useMetrics();
 
-    // Estado para las métricas de engagement
-    const [engagementCounts, setEngagementCounts] = useState({
-        frustrated: 0,
-        confused: 0,
-        bored: 0,
-        engaged: 0,
-    });
 
     useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
+        if (metrics && metrics.stateCounts.Frustrated > 10 && !toastShown) {
+            toast.warning('¡Hay 10 o más estudiantes frustrados!');
+            setToastShown(true);
 
-        const fetchMetrics = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/metrics'); // Cambia a la URL correcta de tu servidor
-                if (!response.ok) {
-                    throw new Error('Error fetching metrics');
-                }
-                const data = await response.json();
-                console.log('Fetched data:', data); // Verifica los datos recibidos
-                setEngagementCounts({
-                    frustrated: data.stateCounts.Frustrated || 0,
-                    confused: data.stateCounts.Confused || 0,
-                    bored: data.stateCounts.Bored || 0,
-                    engaged: data.stateCounts.Engaged || 0,
-                });
-            } catch (error) {
-                console.error('Error fetching metrics:', error);
-            }
-        };
-
-        if (isRecording) {
-            // Si está grabando, realiza el fetch cada 2 segundos
-            fetchMetrics(); // Llama inmediatamente al iniciar
-            interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1 segundos
+            setTimeout(() => setToastShown(false), 3000);
         }
+    }, [metrics, toastShown]);
 
-        return () => {
-            // Limpia el intervalo cuando deje de grabar o cuando el componente se desmonte
-            if (interval) {
-                clearInterval(interval);
-            }
-        };
-    }, [isRecording]); // Solo ejecuta el efecto cuando cambie `isRecording`
-
-    // Efecto para manejar el temporizador
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
 
@@ -78,11 +47,32 @@ const Navbar = () => {
         return () => clearInterval(interval!);
     }, [isRecording]);
 
-    const startRecording = () => {
+    //Realiza un POST hacia el server de express para cambiar el estado del stream
+    const setVideoStream = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/setVideoStream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newState: !isRecording }), //Como el estado tarda en cambiar, se envia el contrario
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al enviar el estado');
+            }
+            console.log('Estado de s enviado correctamente');
+        } catch (error) {
+            console.error('Error al enviar el estado (Catch): ', error);
+        }
+    };
+    
+    const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
         }
         handleRecording(); // Cambia el estado de grabación
+        setVideoStream()//Establece video en flask
     };
 
     const formatTime = (time: number) => {
@@ -101,19 +91,19 @@ const Navbar = () => {
         <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
             <div className="flex space-x-4 md:text-sm xl:text-base">
                 <div className="bg-white text-black shadow-md p-2 rounded sm:w-20 md:w-32">
-                    <span className="block">Frustrated: {engagementCounts.frustrated}</span>
+                    <span className="block">Frustrated: {metrics ? metrics.stateCounts.Frustrated : 0}</span>
                     <div className="w-full h-1 bg-red-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
-                    <span className="block">Confused: {engagementCounts.confused}</span>
+                    <span className="block">Confused: {metrics ? metrics.stateCounts.Confused : 0}</span>
                     <div className="w-full h-1 bg-orange-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
-                    <span className="block">Bored: {engagementCounts.bored}</span>
+                    <span className="block">Bored: {metrics ? metrics.stateCounts.Bored : 0}</span>
                     <div className="w-full h-1 bg-blue-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
-                    <span className="block">Engaged: {engagementCounts.engaged}</span>
+                    <span className="block">Engaged: {metrics ? metrics.stateCounts.Engaged : 0}</span>
                     <div className="w-full h-1 bg-green-500 mt-1"></div>
                 </div>
             </div>
@@ -131,7 +121,7 @@ const Navbar = () => {
                     {isRecording ? 'Finalizar Captura' : 'Iniciar Captura'}
                 </button>
 
-                {pathname === '/login' || '/'  ? null : (
+                {pathname === '/login' || '/' ? null : (
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Avatar>

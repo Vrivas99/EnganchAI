@@ -1,0 +1,53 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="F19E9460-9EBF-5D13-26B7-C98EC24C360F" name="USUARIOS">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>FB3FD0DE-BF1A-CFCC-5132-0423CF7995DA</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="IdUsuario" id="9F989616-B845-CF93-5398-0B23F2B3DAC8">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>E62E4A59-AA15-A9BC-876F-2AA23DFEBBEE</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Correo" id="3B014934-802C-BC9A-3A39-6016EBDB7319">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>58E3BAB2-BA03-CA5C-2294-E12887A878C4</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Contraseña" id="3B82A6F2-21F2-9A0B-9A5A-AB5FE5CB89C0">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>F806B5DC-E9A7-EBAD-55DF-A889BC222889</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="9945EE6D-CE47-F56C-D506-75D438F76182" name="USUARIOS_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>F0AA97DD-2D9D-C37B-4803-503D5038FFEA</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="9F989616-B845-CF93-5398-0B23F2B3DAC8"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
