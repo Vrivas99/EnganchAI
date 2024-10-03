@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Relation class="oracle.dbtools.crest.model.design.logical.Relation" name="Asignaciones" directorySegmentName="seg_0" id="FE136CDD-652B-BC61-0524-A49115BF6560">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 15:50:23 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<engineerTo>
+<item key="B9EF0C61-8AE2-9918-DBAB-C1001C1FC345" value="true"/>
+</engineerTo>
+<identifying>false</identifying>
+<optionalSource>true</optionalSource>
+<optionalTarget>true</optionalTarget>
+<sourceCardinality>*</sourceCardinality>
+<sourceEntity>FB3FD0DE-BF1A-CFCC-5132-0423CF7995DA</sourceEntity>
+<targetCardinalityString>*</targetCardinalityString>
+<targetEntity>ACA6F0A7-2537-5887-77F3-FCD2865A1771</targetEntity>
+<transferable>true</transferable>
+<deleteRule>NO ACTION</deleteRule>
+</Relation>
