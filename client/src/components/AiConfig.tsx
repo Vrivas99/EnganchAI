@@ -21,6 +21,41 @@ const AiConfig: React.FC<AiConfigProps> = () => {
     const [isConfigVisible, setIsConfigVisible] = useState(false); // Controla visibilidad del diálogo de configuración
     const [sensitivity, setSensitivity] = useState(50); // Estado para el input range
 
+    //Actualizar la barra de confianza
+    const getConfidence = async () =>{
+        try {
+            const response = await fetch('http://localhost:5000/getConfidence');
+            if (!response.ok) {
+                throw new Error('Error fetching confidence');
+            }
+            const data = await response.json();
+            console.log('Fetched data:', data); // Verifica los datos recibidos
+            setSensitivity(data);//Los datos desde 
+        } catch (error) {
+            console.error('Error fetching confidence:', error);
+        }
+    }
+
+    //Actualizar la confianza en flask
+    const setConfidence = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/setConfidence', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ setConfidence: sensitivity }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al enviar la confianza');
+            }
+            console.log('Estado de confianza enviado correctamente');
+        } catch (error) {
+            console.error('Error al enviar la confianza (Catch): ', error);
+        }
+    };
+
     // Función para manejar el inicio de sesión
     const handleConfig = (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,13 +77,16 @@ const AiConfig: React.FC<AiConfigProps> = () => {
 
         // Si todo está correcto, cerrar el diálogo de login y abrir el de configuración
         toast.success('Inicio de sesión exitoso');
+        getConfidence();//Recoge la confianza actual de flask para que actualice la barra
         setIsConfigVisible(true);
     };
+
 
     // Función para manejar el guardado de la configuración
     const handleSaveConfig = () => {
         toast.success(`Configuración guardada: Sensibilidad = ${sensitivity}`);
         setIsConfigVisible(false); // Cierra el diálogo de configuración
+        setConfidence()//Envia la nueva confianza a flask
     };
 
     return (

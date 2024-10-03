@@ -32,7 +32,7 @@ const Navbar = () => {
 
         const fetchMetrics = async () => {
             try {
-                const response = await fetch('http://localhost:5000/metrics'); // Cambia a la URL correcta de tu servidor
+                const response = await fetch('http://localhost:5000/metrics');
                 if (!response.ok) {
                     throw new Error('Error fetching metrics');
                 }
@@ -78,11 +78,32 @@ const Navbar = () => {
         return () => clearInterval(interval!);
     }, [isRecording]);
 
-    const startRecording = () => {
+    //Realiza un POST hacia el server de express para cambiar el estado del stream
+    const setVideoStream = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/setVideoStream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newState: !isRecording }), //Como el estado tarda en cambiar, se envia el contrario
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al enviar el estado');
+            }
+            console.log('Estado de s enviado correctamente');
+        } catch (error) {
+            console.error('Error al enviar el estado (Catch): ', error);
+        }
+    };
+    
+    const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
         }
         handleRecording(); // Cambia el estado de grabación
+        setVideoStream()//Establece video en flask
     };
 
     const formatTime = (time: number) => {

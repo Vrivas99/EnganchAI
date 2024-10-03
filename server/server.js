@@ -4,6 +4,7 @@ const axios = require('axios');
 
 const app = express();
 app.use(cors());//Necesario para la conexion con el frontend
+app.use(express.json());
 
 let flaskIP = '127.0.0.1:5001';
 
@@ -16,7 +17,7 @@ b.- ir a client\src\components\VideoCapture.tsx y cambiar la entrada de /camera-
 app.get('/flaskStream', async (req, res) => {
     try {
         const response = await axios({
-            url: `http://${flaskIP}/video_feed`,//Ruta del servidor de flask (no funciono con localhost)
+            url: `http://${flaskIP}/video_feed`,
             method: 'GET',
             responseType: 'stream',
         });
@@ -35,29 +36,41 @@ app.get('/flaskStream', async (req, res) => {
 app.get('/metrics', async (req, res) => {
     try {
         const response = await axios({
-            url: `http://${flaskIP}/metrics`, // Ruta del servidor Flask
+            url: `http://${flaskIP}/metrics`,
             method: 'GET',
             responseType: 'json',
         });
-        currentMetrics = response.data; // Actualiza las métricas con los datos recibidos
-        console.log('Metrics updated:', currentMetrics); // Opcional: Verificar en la consola
+        currentMetrics = response.data;
+        console.log('Metrics updated:', currentMetrics);//Actualiza las metricas
         res.json(currentMetrics);
     } catch (error) {
         console.error('Error fetching metrics:', error);
     }
 });
 
+//Recoger confianza
+app.get('/getConfidence', async (req, res) => {
+    try {
+        const response = await axios({
+            url: `http://${flaskIP}/getConfidence`,
+            method: 'GET',
+            responseType: 'json',
+        });
+        currentConfidence = response.data*100;//Actualiza la confianza (en flask es decimal, pero en react son enteros)
+        res.json(currentConfidence);
+    } catch (error) {
+        console.error('Error fetching confidence: ', error);
+    }
+});
+
 //Modificar umbral de confianza
 app.post('/setConfidence', async (req, res) => {
-    const newConfidence = 0.5;//req.body.minConfidence;
+    const { setConfidence } = req.body
+    const newConfidence = setConfidence/100//Transformar la confianza de entero (react) a decimal (flask)
 
-    //Limitar el umbral
-    if (newConfidence < 0){newConfidence = 0 } 
-    else if (newConfidence > 1){ newConfidence = 1 }
-    
     try {
-        // Enviar el POST a Flask para cambiar el umbral de confianza
-        const response = await axios.post(`http://${flaskIP}//setConfidence`, {
+        //Enviar el POST a Flask para cambiar el umbral de confianza
+        const response = await axios.post(`http://${flaskIP}/setConfidence`, {
             minConfidence: newConfidence
         });
 
@@ -66,6 +79,25 @@ app.post('/setConfidence', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Error cambiando la confianza' });
+    }
+});
+
+//Activar o desactivar video (Para evitar desincronizacion)
+app.post('/setVideoStream', async (req, res) => {
+    const { newState } = req.body;
+
+    console.log("estado recibido: ",newState)
+    try {
+        // Enviar el POST a Flask para cambiar el umbral de confianza
+        const response = await axios.post(`http://${flaskIP}/setVideoStream`, {
+            processVideo: newState
+        });
+
+        // Devolver la respuesta a Express
+        res.status(200).send(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Error estableciendo un estado' });
     }
 });
 
