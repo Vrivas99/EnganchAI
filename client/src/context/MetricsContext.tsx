@@ -5,8 +5,25 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRecording } from './RecordingContext'; // Importa el RecordingContext para utilizar isRecording
 
 // Define la interfaz para el contexto de métricas
+
+interface Metric {
+    confidence: number;
+    state: string;
+}
+
+interface MetricsResponse {
+    Ids: Record<string, Metric>; // Un diccionario con las IDs y sus métricas
+    stateCounts: {
+        Bored: number;
+        Confused: number;
+        Engaged: number;
+        Frustrated: number;
+    };
+    totalPeople: number;
+}
+
 interface MetricsContextType {
-    metrics: any; // Cambia 'any' por el tipo adecuado según tu estructura de datos
+    metrics: MetricsResponse;
 }
 
 // Crea el contexto de métricas
