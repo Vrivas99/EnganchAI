@@ -2,13 +2,19 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+// Componentes
 import Navbar from "@/components/Navbar";
 import Aside from "@/components/Aside";
 import AiConfig from "@/components/AiConfig";
-import { RecordingProvider } from "@/context/RecordingContext";
-import { MetricsProvider } from '@/context/MetricsContext'; // Importa el MetricsProvider
+import { Toaster } from "@/components/ui/sonner";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Contextos
+import { RecordingProvider } from "@/context/RecordingContext";
+import { MetricsProvider } from "@/context/MetricsContext";
+
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +39,9 @@ export default function RootLayout({
               <AiConfig />
               <div className="flex-1 overflow-auto">
                 {children}
+                <Toaster
+                  position='top-left'
+                />
               </div>
             </main>
             {/* Toast container */}
@@ -43,6 +52,7 @@ export default function RootLayout({
               rtl={false}
               closeOnClick
             />
+
           </MetricsProvider>
         </RecordingProvider>
       </body>
