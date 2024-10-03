@@ -12,17 +12,18 @@ import os
 import queue
 q=queue.Queue(maxsize=10)#Crear queue para pasar los frames entre multiprocesos
 import threading
-#pip install flask opencv-python-headless tensorflow ultralytics python-dotenv torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+#pip install flask opencv-python-headless tensorflow ultralytics python-dotenv [torch, solo si flask lo pide]
 #Necesita un modelo .h5 que pesa mas del limite de github, descargar para probar
 
 app = Flask(__name__)
 
-# Definir colores para cada estado de engagement
+# Definir colores para cada estado de engagement (BGR)
 colorList = {
-    "Engaged": (34, 197, 94),  # Verde
-    "Frustrated": (59, 130, 246),    # Rojo
-    "Confused": (249, 115, 22),   # Naranjo
-    "Bored":  (239, 68, 68)   # Celeste
+    "Engaged": (94, 197, 34),  # Verde claro
+    "Frustrated": (68, 68, 239),   # Rojo
+    "Confused": (22, 115, 249),   # Naranjo
+    "Bored": (246, 130, 59)     # Celeste
 }
 
 #Metricas

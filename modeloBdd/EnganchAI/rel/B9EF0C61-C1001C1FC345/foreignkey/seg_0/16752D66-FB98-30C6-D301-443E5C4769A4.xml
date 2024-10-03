@@ -1,0 +1,16 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="16752D66-FB98-30C6-D301-443E5C4769A4" containerWithKeyObject="1BED0608-78C5-DF7B-610D-2481CB48288F" localFKIndex="F73274DC-2599-7081-EDE0-3CBAB16F4C81" name="METRICAS_Asignaciones_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-03 13:23:23 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<referredTableLongName>Asignaciones</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>0CC29088-5ADD-04C2-37AB-24E3D196BB03</referredTableID>
+<keyObject>2FC2E953-20C4-E463-C98B-F09067F89735</keyObject>
+<referredKeyID>2FC2E953-20C4-E463-C98B-F09067F89735</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>USUARIOS(PROFESORES)_Id,SALAS(CAMARAS)_Id</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>
