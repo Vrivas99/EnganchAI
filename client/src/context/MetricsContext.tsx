@@ -12,14 +12,14 @@ interface Metric {
 }
 
 interface MetricsResponse {
-    Ids: Record<string, Metric>; // Un diccionario con las IDs y sus métricas
+    Ids: {}; // Un diccionario con las IDs y sus métricas
     stateCounts: {
-        Bored: number;
-        Confused: number;
-        Engaged: number;
-        Frustrated: number;
+        Bored: 0;
+        Confused: 0;
+        Engaged: 0;
+        Frustrated: 0;
     };
-    totalPeople: number;
+    totalPeople: 0;
 }
 
 interface MetricsContextType {

@@ -86,7 +86,7 @@ app.post('/setConfidence', async (req, res) => {
 app.post('/setVideoStream', async (req, res) => {
     const { newState } = req.body;
 
-    console.log("estado recibido: ",newState)
+    console.log("set video stream: ",newState)
     try {
         // Enviar el POST a Flask para cambiar el umbral de confianza
         const response = await axios.post(`http://${flaskIP}/setVideoStream`, {

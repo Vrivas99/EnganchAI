@@ -42,7 +42,7 @@ yoloModel = yoloModel.to('cpu')#device
 
 #Contador de ID's
 personIdCounter = 1
-activePersonIds = {}
+activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
 #Lista de ip que sirven para pruebas
 #http://162.191.81.11:81/cgi-bin/mjpeg?resolution=800x600&quality=1&page=1725548701621&Language=11
@@ -52,13 +52,13 @@ activePersonIds = {}
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-camLink = "TestVideos/3.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
-processVideo = False#Determina si el video se procesara o no
+processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
-fpsTarget = 1#Cantidad de fps que se quiere procesar
+fpsTarget = 3#Cantidad de fps que se quiere procesar
 frameCount = 0
 fpsStream = 0#FPS de la transmision
 
@@ -123,7 +123,7 @@ def receiveStream():
 
 #Recibir frames de receiveStream, procesarlos en yolo y enviarlos a la API
 def displayFrames():
-    global metricsAPI, personIdCounter, activePersonIds,frameCount
+    global metricsAPI, personIdCounter, activePersonIds, frameCount
     while True:#Evita que el Thread finalice
         while processVideo:
             if q.empty() !=True:
@@ -155,16 +155,18 @@ def displayFrames():
                 results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado, classes=0 para personas
                 metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
                 if results and len(results[0].boxes) > 0:
-                    personDetected = False #Resetear verificador de personas por frame
+                    #personDetected = False #Resetear verificador de personas por frame
+                    #Se resetea el contador de IDs
+                    resetIDCounter()
                     for detection in results[0].boxes:
                         if detection.id is not None:
-                            personDetected = True#Persona detectada
+                            #personDetected = True#Persona detectada
                             yoloTrackID = int(detection.id.item())
 
                             #Si el iD de yolo no esta en mi variable customisada, asignar una
                             if yoloTrackID not in activePersonIds:
                                 activePersonIds[yoloTrackID] = personIdCounter
-                                personIdCounter +=1
+                                personIdCounter += 1
 
                             #Obtenemos el ID personalizado de la persona
                             trackID = activePersonIds[yoloTrackID]
@@ -209,16 +211,7 @@ def displayFrames():
                                 #Texto de estado + % de probabilidad
                                 cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
                                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                                    
-                                    
-
-                    #Si no hay personas en la imagen, resetear ID
-                    if not personDetected:
-                        resetIDCounter()
-                else:
-                    #Si no hay resultados o boxes (aunque este no filtra por personas)
-                    resetIDCounter()
-                
+          
                 #endregion
 
                 #region Enviar los frames a la pantalla
@@ -227,7 +220,7 @@ def displayFrames():
                 ret, buffer = cv2.imencode('.jpg', frame)
                 if not ret:
                     continue
-                
+                print("ACTIVE PERSONS: ",activePersonIds)
                 #Actualizar las metricas solo cuando se haya terminado de procesar el frame
                 metricsAPI = copy.deepcopy(metrics)
 
