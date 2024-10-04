@@ -25,7 +25,7 @@ const Navbar = () => {
 
 
     useEffect(() => {
-        if (metrics && metrics.stateCounts.Frustrated > 10 && !toastShown) {
+        if (metrics?.stateCounts?.Frustrated > 10 && !toastShown) {
             toast.warning('¡Hay 10 o más estudiantes frustrados!');
             setToastShown(true);
 
@@ -91,19 +91,19 @@ const Navbar = () => {
         <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
             <div className="flex space-x-4 md:text-sm xl:text-base">
                 <div className="bg-white text-black shadow-md p-2 rounded sm:w-20 md:w-32">
-                    <span className="block">Frustrated: {metrics ? metrics.stateCounts.Frustrated : 0}</span>
+                    <span className="block">Frustrated: {metrics?.stateCounts?.Frustrated || 0}</span>
                     <div className="w-full h-1 bg-red-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
-                    <span className="block">Confused: {metrics ? metrics.stateCounts.Confused : 0}</span>
+                    <span className="block">Confused: {metrics?.stateCounts?.Confused || 0}</span>
                     <div className="w-full h-1 bg-orange-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
-                    <span className="block">Bored: {metrics ? metrics.stateCounts.Bored : 0}</span>
+                    <span className="block">Bored: {metrics?.stateCounts?.Bored || 0}</span>
                     <div className="w-full h-1 bg-blue-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
-                    <span className="block">Engaged: {metrics ? metrics.stateCounts.Engaged : 0}</span>
+                    <span className="block">Engaged: {metrics?.stateCounts?.Engaged || 0}</span>
                     <div className="w-full h-1 bg-green-500 mt-1"></div>
                 </div>
             </div>
