@@ -66,7 +66,7 @@ const Navbar = () => {
             console.error('Error al enviar el estado (Catch): ', error);
         }
     };
-    
+
     const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
@@ -121,7 +121,7 @@ const Navbar = () => {
                     {isRecording ? 'Finalizar Captura' : 'Iniciar Captura'}
                 </button>
 
-                {pathname === '/login' || '/' ? null : (
+                {(pathname !== '/login' && pathname !== '/') && (
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Avatar>
