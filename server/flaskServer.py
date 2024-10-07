@@ -52,7 +52,7 @@ activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+camLink = "TestVideos/3.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
@@ -188,6 +188,7 @@ def displayFrames():
                                 predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
                                 predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
 
+                                print("PREDICCIONES ",engagementPrediction[0])
                                 #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
                                 if predictedProbabilities > minConfidence:
                                     engagementState = daiseeLabels[predictedIndex]
@@ -220,7 +221,6 @@ def displayFrames():
                 ret, buffer = cv2.imencode('.jpg', frame)
                 if not ret:
                     continue
-                print("ACTIVE PERSONS: ",activePersonIds)
                 #Actualizar las metricas solo cuando se haya terminado de procesar el frame
                 metricsAPI = copy.deepcopy(metrics)
 

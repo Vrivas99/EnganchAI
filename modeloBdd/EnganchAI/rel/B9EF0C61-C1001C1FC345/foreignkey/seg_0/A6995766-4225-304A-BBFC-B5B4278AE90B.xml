@@ -1,0 +1,16 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="A6995766-4225-304A-BBFC-B5B4278AE90B" containerWithKeyObject="1BED0608-78C5-DF7B-610D-2481CB48288F" localFKIndex="C653B82A-055A-44A5-87E9-B78586AE54B5" name="METRICAS_ASIGNACIONES_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:55:10 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<referredTableLongName>ASIGNACIONES</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>4930C055-1990-99D3-3EEB-9D5C4B8938EB</referredTableID>
+<keyObject>42385D87-D6A9-BB02-F257-454E4728C30A</keyObject>
+<referredKeyID>42385D87-D6A9-BB02-F257-454E4728C30A</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>idAsignacion</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

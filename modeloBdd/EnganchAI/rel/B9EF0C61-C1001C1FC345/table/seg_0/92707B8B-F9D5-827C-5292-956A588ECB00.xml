@@ -1,0 +1,56 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="92707B8B-F9D5-827C-5292-956A588ECB00" name="SECCIONES">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:51:47 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<ordsAlias>table_5</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="IdSeccion" id="DA8C652C-02A2-47BA-A406-DCF2DE9DC727">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:52:10 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="SALAS_IdSala" id="41420EEE-A95D-2260-F5C8-B564A9A2D7C0">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:52:52 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="F87E2616-A0AD-EDDD-DEB8-AA73B7A48E37" referredColumn="41326A2D-3A46-A2A7-E5C1-A3CD932022EB"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="42C2A1E7-2C73-9F78-A0A2-8D452B4EAE85" name="SECCIONES_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:52:10 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="DA8C652C-02A2-47BA-A406-DCF2DE9DC727"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="8BB91DFA-DAF8-D153-36FF-0FACCFDE5F59" name="SECCIONES_SALAS_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:52:52 UTC</createdTime>
+<generatorID>4C720E31-1918-C53B-9CA3-0346BCAEA0A5</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="41420EEE-A95D-2260-F5C8-B564A9A2D7C0"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
