@@ -1,10 +1,9 @@
-// MetricsContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRecording } from './RecordingContext'; // Importa el RecordingContext para utilizar isRecording
+import { useRecording } from './RecordingContext';
 
-// Define la interfaz para el contexto de métricas
+// Definición de la interfaz para el contexto de métricas
 
 interface Metric {
     confidence: number;
@@ -12,7 +11,7 @@ interface Metric {
 }
 
 interface MetricsResponse {
-    Ids: Record<string, Metric>; // Un diccionario con las IDs y sus métricas
+    Ids: Record<string, Metric>; //Diccionario con las IDs y sus métricas
     stateCounts: {
         Bored: number;
         Confused: number;
@@ -26,10 +25,10 @@ interface MetricsContextType {
     metrics: MetricsResponse;
 }
 
-// Crea el contexto de métricas
+// Creación del contexto de métricas
 const MetricsContext = createContext<MetricsContextType | undefined>(undefined);
 
-// Hook personalizado para usar el contexto de métricas
+// Hook para usar el contexto de métricas
 export const useMetrics = () => {
     const context = useContext(MetricsContext);
     if (!context) {
@@ -38,7 +37,7 @@ export const useMetrics = () => {
     return context;
 };
 
-// Proveedor del contexto que maneja el estado de métricas
+// Provider del contexto que maneja el estado de métricas
 export const MetricsProvider = ({ children }: { children: ReactNode }) => {
     const [metrics, setMetrics] = useState<any>(null);
     const { isRecording } = useRecording(); // Usar isRecording desde el RecordingContext
@@ -47,7 +46,7 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
         let interval: NodeJS.Timeout | null = null;
 
         if (isRecording) {
-            // Hacer la solicitud a la API de métricas solo cuando se esté grabando
+            // Hace la solicitud a la API de métricas solo cuando se esté grabando
             const fetchMetrics = async () => {
                 try {
                     const response = await fetch('http://localhost:5000/metrics');
