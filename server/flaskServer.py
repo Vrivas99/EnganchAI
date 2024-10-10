@@ -44,21 +44,17 @@ yoloModel = yoloModel.to('cpu')#device
 personIdCounter = 1
 activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
-#Lista de ip que sirven para pruebas
-#http://162.191.81.11:81/cgi-bin/mjpeg?resolution=800x600&quality=1&page=1725548701621&Language=11
-#http://129.125.136.20/mjpg/video.mjpg?resolution=800x600&quality=1&page=1725548701621&Language=11
-
 #Datos de la camara
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-camLink = "TestVideos/3.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+camLink = "TestVideos/5.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
-fpsTarget = 3#Cantidad de fps que se quiere procesar
+fpsTarget = 10#Cantidad de fps que se quiere procesar
 frameCount = 0
 fpsStream = 0#FPS de la transmision
 
@@ -73,13 +69,22 @@ else:
     #if torch.cuda.is_available():
     #    print("Número de GPUs:", torch.cuda.device_count())
     #    print("Nombre de la GPU:", torch.cuda.get_device_name(0))
-    print("\n///////\nstream in http://127.0.0.1:5001/video_feed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
+    print("\n///////\nstream in http://127.0.0.1:5001/videoFeed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
 
 #Limpiar el contador de ID cuando no se detecten mas personas en un frame
 def resetIDCounter():
     global personIdCounter, activePersonIds
     personIdCounter = 1
     activePersonIds = {}
+
+#Dibujar texto y un fondo en la imagen (para ID y engagement)
+def drawCv2Text(img, text, pos=(0,0), font=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, colorRect=(0,0,0),colorText=(255,255,255), fontThick=1):
+    x, y = pos
+    textSize = cv2.getTextSize(text, font, fontScale, fontThick)[0]
+    textW, textH = textSize
+    cv2.rectangle(img, (x,y), (x + textW, y + textH), colorRect, -1)
+    cv2.putText(img, text, (x, int(y + textH + fontScale - 1)), font, fontScale, colorText, fontThick)
+    return textSize
 
 #Recibir transmision desde la camara y enviarla a displayFrames
 def receiveStream():
@@ -96,6 +101,12 @@ def receiveStream():
     q.put(frame)
     
     while True:#Evita que el Thread finalice
+        if not processVideo:#Dejar de recibir video si no se esta procesando
+            if cap:
+                cap.release()
+                q.empty()
+            continue
+        
         ret, frame = cap.read()
         if not ret:
             print("receiveStream() not RET")
@@ -112,7 +123,7 @@ def receiveStream():
         fpsStream = fps
 
         #FPS del stream
-        cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
+        #cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
 
         ##Redimensionar el frame si no cumple con la resolucion deseada
         if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
@@ -188,13 +199,16 @@ def displayFrames():
                                 predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
                                 predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
 
-                                print("PREDICCIONES ",engagementPrediction[0])
                                 #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
                                 if predictedProbabilities > minConfidence:
                                     engagementState = daiseeLabels[predictedIndex]
                                 else:
                                     #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
                                     continue
+                                    
+                                #Obtener los estados resagados
+                                otherIndex = [i for i in range(len(daiseeLabels)) if i != predictedIndex]
+                                otherLabels = [(daiseeLabels[i], engagementPrediction[0][i]) for i in otherIndex]
 
                                 #Agregar el contador de estado
                                 metrics["stateCounts"][engagementState] += 1
@@ -210,9 +224,13 @@ def displayFrames():
                                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
                                 #Texto de estado + % de probabilidad
-                                cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), 
-                                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-          
+                                #cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                                drawCv2Text(frame,f'{trackID} | {engagementState[0:1]} %{round(predictedProbabilities*100)}',(x1, y1 - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,color,(255,255,255),1)
+                                #Textos de estados resagados (abajo)
+                                drawCv2Text(frame,
+                                            f'{otherLabels[0][0][0:1]} %{round(otherLabels[0][1]*100)}, {otherLabels[1][0][0:1]} %{round(otherLabels[1][1]*100)},{otherLabels[2][0][0:1]} %{round(otherLabels[2][1]*100)}'
+                                            ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
+
                 #endregion
 
                 #region Enviar los frames a la pantalla
@@ -232,9 +250,22 @@ def displayFrames():
                 #endregion
 
 #Ruta del video en stream
-@app.route('/video_feed')
+@app.route('/videoFeed')
 def video_feed():
     return Response(displayFrames(), mimetype='multipart/x-mixed-replace; boundary=--frame')
+
+#Establecer link de la camara
+@app.route('/setCamLink', methods=['POST'])
+def setCamLink():
+    global camLink
+
+    try:
+        data = request.get_json()
+        camLink = data.get('camLink')
+
+        return jsonify({"status": "success", "newLink": camLink}), 200
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Invalid value"}), 400
 
 #Enviar las metricas a express
 @app.route('/metrics', methods=('GET',))

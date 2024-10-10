@@ -17,7 +17,7 @@ b.- ir a client\src\components\VideoCapture.tsx y cambiar la entrada de /camera-
 app.get('/flaskStream', async (req, res) => {
     try {
         const response = await axios({
-            url: `http://${flaskIP}/video_feed`,
+            url: `http://${flaskIP}/videoFeed`,
             method: 'GET',
             responseType: 'stream',
         });
@@ -98,6 +98,26 @@ app.post('/setVideoStream', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Error estableciendo un estado' });
+    }
+});
+
+//Cambiar el link de la camara
+app.post('/setCamLink', async (req, res) => {
+    const camValue = req.query.v;
+
+    if (camValue) {
+        try {
+            // Realiza la solicitud POST al servidor Flask
+            const response = await axios.post(`http://${flaskIP}/setCamLink`, {
+                camLink: camValue
+            });
+            return res.status(200).send(response.data);
+        } catch (error) {
+            console.error('Error al enviar la solicitud al servidor Flask:', error);
+            return res.status(500).send('Error al comunicar con el servidor Flask');
+        }
+    } else {
+        return res.status(400).send('Missing value');
     }
 });
 
