@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 import os
 #Crear multiprocesos para no saturar las funciones
 import queue
-q=queue.Queue(maxsize=2)#Crear queue para pasar los frames entre multiprocesos
+#Crear queue para pasar los frames entre multiprocesos
+q=queue.Queue(maxsize=1)#procesStream()
+q2=queue.Queue(maxsize=2)#displayStream()
 import threading
 
 #pip install flask opencv-python-headless tensorflow ultralytics python-dotenv [torch, solo si flask lo pide]
@@ -48,19 +50,23 @@ activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-camLink = "TestVideos/5.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
-fpsTarget = 10#Cantidad de fps que se quiere procesar
+fpsTarget = 24#Cantidad de fps que se quiere procesar
 frameCount = 0
 fpsStream = 0#FPS de la transmision
 
 #Resolucion del stream
 resWidth = 1920
 resHeight = 1080
+
+#Pasar datos entre process y display stream
+dataStream = []
+proNextFrame = True#Intenta poner al dia a procesStream
 
 if not cap.isOpened():
     raise Exception("Error: Could not open video stream.")
@@ -88,7 +94,7 @@ def drawCv2Text(img, text, pos=(0,0), font=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0
 
 #Recibir transmision desde la camara y enviarla a displayFrames
 def receiveStream():
-    global frameCount, fpsStream
+    global frameCount, fpsStream, proNextFrame
     cap = cv2.VideoCapture(camLink)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
     #Intenta cambiar la resolucion desde la fuente de video (algunos dispositivos pueden no permitir un cambio en la resolucion)
@@ -98,13 +104,19 @@ def receiveStream():
     #Si el dispositivo no admite el cambio de resolucion con set (ej: rtsp), cambiar la resolucion manualmente
     if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
         frame = cv2.resize(frame, (resWidth, resHeight))#Tamaño de entrada (debe coincidir con la redimension dentro del while)
-    q.put(frame)
+    if proNextFrame and not q.full():
+        q.put_nowait(frame)
+        proNextFrame = False
+    q2.put(frame)
     
     while True:#Evita que el Thread finalice
         if not processVideo:#Dejar de recibir video si no se esta procesando
+            print("not process video")
             if cap:
                 cap.release()
                 q.empty()
+                q2.empty()
+                print("not process video si cap")
             continue
         
         ret, frame = cap.read()
@@ -123,35 +135,43 @@ def receiveStream():
         fpsStream = fps
 
         #FPS del stream
-        #cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
+        cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
 
         ##Redimensionar el frame si no cumple con la resolucion deseada
         if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
             frame = cv2.resize(frame, (resWidth, resHeight))
         
-        #Enviar los frames a displayFrames()
-        q.put(frame)
+        #Enviar los frames a...
+        if proNextFrame and not q.full():
+            q.put_nowait(frame)#procesStream()
+            proNextFrame = False
 
-#Recibir frames de receiveStream, procesarlos en yolo y enviarlos a la API
-def displayFrames():
-    global metricsAPI, personIdCounter, activePersonIds, frameCount
+        q2.put(frame)#displayStream()
+
+#Procesar los frames de receive Stream
+def procesStream():
+    global metricsAPI, personIdCounter, activePersonIds, frameCount, dataStream, proNextFrame
     while True:#Evita que el Thread finalice
         while processVideo:
             if q.empty() !=True:
                 frame=q.get()#Recibir los frames de "receiveStream"
-
+                print("PS get frame")
                 #region procesar frames en yolo
                 #Para no aumentar la carga de la cpu, solo procesar x frames por segundo
-                frameCount+=1
+                """ frameCount+=1
 
                 #Verifica si el buffer se esta llenando
                 if q.qsize() > 1:
                     print("Skipping due to buffer")
                     continue
 
+                if fpsStream == 0:#Evitar un error de frames (division x 0)
+                    print("El stream no tiene frames")
+                    continue
+
                 if frameCount % (fpsStream // fpsTarget) != 0:
                     print("Frame count skip")
-                    continue
+                    continue """
                 frameCount = 0
                 
                 #Establecer metricas locales
@@ -161,7 +181,9 @@ def displayFrames():
                 
                 #Mover el frame a GPU/CPU
                 #frameTensor = torch.from_numpy(frame).to(device)
-
+                
+                #Crear un data temporal para actualizar solo cuando este listo
+                tempData = []
                 # deteccion de objetos de YOLO
                 results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado, classes=0 para personas
                 metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
@@ -217,21 +239,55 @@ def displayFrames():
                                 metrics["Ids"][trackID]["confidence"] = round(predictedProbabilities*100)#Temporalmente agrego el porcentaje de probabilidad
                                 metrics["Ids"][trackID]["state"] = engagementState
 
-                                #Seleccionar el color correspondiente
-                                color = colorList.get(engagementState, (255, 255, 255))  # Blanco por defecto si no se encuentra
+                                #Pasar resultados de cada rostro
+                                tempData.append({
+                                    "trackID":trackID,
+                                    "x1": x1,
+                                    "y1": y1,
+                                    "x2": x2,
+                                    "y2": y2,
+                                    "engagementState": engagementState,
+                                    "predictedProbabilities": predictedProbabilities,
+                                    "otherLabels": otherLabels
+                                })
 
-                                #Bound box
-                                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                #Actualizar las metricas solo cuando se haya terminado de procesar el frame
+                metricsAPI = copy.deepcopy(metrics)
+                #Permitir recibir el siguiente frame
+                proNextFrame = True
+                #Actualizar los resultados de Yolo+CNN para pasarlos a displayStream()
+                dataStream = tempData
 
-                                #Texto de estado + % de probabilidad
-                                #cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                                drawCv2Text(frame,f'{trackID} | {engagementState[0:1]} %{round(predictedProbabilities*100)}',(x1, y1 - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,color,(255,255,255),1)
-                                #Textos de estados resagados (abajo)
-                                drawCv2Text(frame,
-                                            f'{otherLabels[0][0][0:1]} %{round(otherLabels[0][1]*100)}, {otherLabels[1][0][0:1]} %{round(otherLabels[1][1]*100)},{otherLabels[2][0][0:1]} %{round(otherLabels[2][1]*100)}'
-                                            ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
+#Recibir frames de receiveStream y ponerle los boundbox de yolo
+def displayStream():
+    while True:#Evita que el Thread finalice
+        while processVideo:
+            if q2.empty() !=True:
+                frame=q2.get()#Recibir los frames de "receiveStream"
+                for i in range(len(dataStream)):
+                    #Es mas legible crear variables locales que poner todo el listado como argumento
+                    engagementState = dataStream[i]["engagementState"]
+                    x1 = dataStream[i]["x1"]
+                    y1 = dataStream[i]["y1"]
+                    x2 = dataStream[i]["x2"]
+                    y2 = dataStream[i]["y2"]
+                    trackID = dataStream[i]["trackID"]
+                    predictedProbabilities = dataStream[i]["predictedProbabilities"]
+                    otherLabels = dataStream[i]["otherLabels"]
 
-                #endregion
+                    #Seleccionar el color correspondiente
+                    color = colorList.get(engagementState, (255, 255, 255))  # Blanco por defecto si no se encuentra
+
+                    #Bound box
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+                    #Texto de estado + % de probabilidad
+                    #cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                    drawCv2Text(frame,f'{trackID} | {engagementState[0:1]} %{round(predictedProbabilities*100)}',(x1, y1 - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,color,(255,255,255),1)
+                    #Textos de estados resagados (abajo)
+                    drawCv2Text(frame,
+                        f'{otherLabels[0][0][0:1]} %{round(otherLabels[0][1]*100)}, {otherLabels[1][0][0:1]} %{round(otherLabels[1][1]*100)},{otherLabels[2][0][0:1]} %{round(otherLabels[2][1]*100)}'
+                        ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
 
                 #region Enviar los frames a la pantalla
 
@@ -239,8 +295,7 @@ def displayFrames():
                 ret, buffer = cv2.imencode('.jpg', frame)
                 if not ret:
                     continue
-                #Actualizar las metricas solo cuando se haya terminado de procesar el frame
-                metricsAPI = copy.deepcopy(metrics)
+                    
 
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
@@ -252,7 +307,7 @@ def displayFrames():
 #Ruta del video en stream
 @app.route('/videoFeed')
 def video_feed():
-    return Response(displayFrames(), mimetype='multipart/x-mixed-replace; boundary=--frame')
+    return Response(displayStream(), mimetype='multipart/x-mixed-replace; boundary=--frame')
 
 #Establecer link de la camara
 @app.route('/setCamLink', methods=['POST'])
@@ -312,10 +367,13 @@ def setProcessVideo():
 if __name__ == "__main__":
     #Crear hilos para no sobrecargar un proceso recibiendo y procesando frames
     p1=threading.Thread(target=receiveStream)
-    p2 = threading.Thread(target=displayFrames)
+    p2=threading.Thread(target=procesStream)
+    p3=threading.Thread(target=displayStream)
     p1.daemon = True#Los hilos terminaran cuando la funcion principal (flask) termine
     p2.daemon = True
+    p3.daemon = True
     p1.start()
     p2.start()
+    p3.start()
     #Abrir servidor de flask
     app.run(host='127.0.0.1', port=5001, debug=False)
