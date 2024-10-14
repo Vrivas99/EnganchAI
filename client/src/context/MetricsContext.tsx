@@ -23,6 +23,8 @@ interface MetricsResponse {
 
 interface MetricsContextType {
     metrics: MetricsResponse;
+    isSessionEnded: boolean;  // Nuevo estado para determinar si la sesión ha finalizado
+    sessionReport: MetricsResponse | null;
 }
 
 // Creación del contexto de métricas
@@ -39,7 +41,9 @@ export const useMetrics = () => {
 
 // Provider del contexto que maneja el estado de métricas
 export const MetricsProvider = ({ children }: { children: ReactNode }) => {
-    const [metrics, setMetrics] = useState<any>(null);
+    const [metrics, setMetrics] = useState<MetricsResponse | any>(null);
+    const [isSessionEnded, setIsSessionEnded] = useState(false);
+    const [sessionReport, setSessionReport] = useState<MetricsResponse | null>(null);
     const { isRecording } = useRecording(); // Usar isRecording desde el RecordingContext
 
     useEffect(() => {
@@ -59,16 +63,16 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
 
             fetchMetrics();
             interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1
-        } else {
-            setMetrics(null); // Resetea las métricas cuando no se está grabando
-            clearInterval(interval!);
+        } else if (!isRecording && metrics) {
+            setSessionReport(metrics);
+            setIsSessionEnded(true);
         }
 
         return () => clearInterval(interval!);
     }, [isRecording]); // Dependencia de isRecording
 
     return (
-        <MetricsContext.Provider value={{ metrics }}>
+        <MetricsContext.Provider value={{ metrics, isSessionEnded, sessionReport}}>
             {children}
         </MetricsContext.Provider>
     );
