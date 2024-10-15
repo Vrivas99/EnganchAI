@@ -14,8 +14,11 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>344C7269-2BC7-D423-28F7-D5534792DCE8</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
 <Column name="Link" id="5016EFC4-0782-F276-02AD-68EF8AD0A01B">
@@ -23,8 +26,11 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>29D31ED2-CA17-B6EC-25E0-F5AAD08BE049</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>100</dataTypeSize>
+<ownDataTypeParameters>100,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
 </columns>

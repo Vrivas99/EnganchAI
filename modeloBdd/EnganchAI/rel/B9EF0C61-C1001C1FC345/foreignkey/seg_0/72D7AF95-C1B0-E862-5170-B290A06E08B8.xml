@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
-<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="F87E2616-A0AD-EDDD-DEB8-AA73B7A48E37" containerWithKeyObject="92707B8B-F9D5-827C-5292-956A588ECB00" localFKIndex="8BB91DFA-DAF8-D153-36FF-0FACCFDE5F59" name="SECCIONES_SALAS_FK">
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="72D7AF95-C1B0-E862-5170-B290A06E08B8" containerWithKeyObject="0D20BAE5-3C19-CE27-66DA-8C3C83934E32" localFKIndex="1F74EB72-F40C-15B0-1ADA-EE6F7927EB79" name="SALAS_SECCIONES_SALAS_FK">
 <createdBy>Jordan</createdBy>
-<createdTime>2024-10-07 12:52:52 UTC</createdTime>
+<createdTime>2024-10-11 14:39:37 UTC</createdTime>
 <generatorID>4C720E31-1918-C53B-9CA3-0346BCAEA0A5</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
 <referredTableLongName>SALAS</referredTableLongName>

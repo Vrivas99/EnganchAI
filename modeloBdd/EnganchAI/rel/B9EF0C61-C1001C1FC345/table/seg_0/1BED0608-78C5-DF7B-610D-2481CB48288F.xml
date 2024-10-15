@@ -13,8 +13,11 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>F906920D-D5EE-CE86-C198-9C61BAD2B720</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
 <Column name="Json" id="416CC3FD-998A-9F44-219E-E592CF27F930">
@@ -22,7 +25,9 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>19F3281E-84E2-9BB5-37E0-864F7F781E4E</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>47823B89-BECE-2D4A-B641-EE3BE6149078</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
@@ -30,7 +35,10 @@
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-07 12:55:10 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <previousColumn>false</previousColumn>
 <autoIncrementCycle>false</autoIncrementCycle>

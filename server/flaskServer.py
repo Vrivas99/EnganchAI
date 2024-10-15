@@ -33,12 +33,13 @@ metrics = {} #Metricas locales, se modificaran aqui (flask); Se va definiendo en
 metricsAPI = {}#Metricas que se enviaran al frontend, copiara el contenido de "metrics" cuando se termine de procesar el frame
 
 #DAISEE
-daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
-minConfidence = 0.3#umbral minimo de confianza
+#Yolo names:  {0: 'Sleepy', 1: 'bored', 2: 'confused', 3: 'engaged', 4: 'frustrated', 5: 'yawning'}
+daiseeLabels = ["Sleepy","Bored", "Confused", "Engaged","Frustrated","Yawning"]
+minConfidence = 0.0#0.3#umbral minimo de confianza
 
 #Cargar modelos
 engagementModel = tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
-yoloModel = YOLO('yolov8n-face.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
+yoloModel = YOLO('best_model.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
 #device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible
 yoloModel = yoloModel.to('cpu')#device
 
@@ -51,6 +52,7 @@ load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
 camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
@@ -158,25 +160,11 @@ def procesStream():
                 print("PS get frame")
                 #region procesar frames en yolo
                 #Para no aumentar la carga de la cpu, solo procesar x frames por segundo
-                """ frameCount+=1
-
-                #Verifica si el buffer se esta llenando
-                if q.qsize() > 1:
-                    print("Skipping due to buffer")
-                    continue
-
-                if fpsStream == 0:#Evitar un error de frames (division x 0)
-                    print("El stream no tiene frames")
-                    continue
-
-                if frameCount % (fpsStream // fpsTarget) != 0:
-                    print("Frame count skip")
-                    continue """
                 frameCount = 0
                 
                 #Establecer metricas locales
                 metrics["totalPeople"] = 0
-                metrics["stateCounts"] = {"Frustrated": 0, "Confused": 0, "Bored": 0, "Engaged": 0}
+                metrics["stateCounts"] = {"Sleepy":0,"Bored":0, "Confused":0, "Engaged":0,"Frustrated":0,"Yawning":0}
                 metrics["Ids"] = {}
                 
                 #Mover el frame a GPU/CPU
@@ -185,16 +173,22 @@ def procesStream():
                 #Crear un data temporal para actualizar solo cuando este listo
                 tempData = []
                 # deteccion de objetos de YOLO
-                results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado, classes=0 para personas
+                results = yoloModel.track(frame, persist=True)#yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado, classes=0 para personas
+                print("Yolo names: ",yoloModel.names)
                 metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
                 if results and len(results[0].boxes) > 0:
                     #personDetected = False #Resetear verificador de personas por frame
                     #Se resetea el contador de IDs
                     resetIDCounter()
                     for detection in results[0].boxes:
-                        if detection.id is not None:
+                        #print("//////////////detection/////////////// ",detection)
+                        print("ID: ",detection.id,"Detected state: ",yoloModel.names[int(detection.cls[0])], "-idclass ", int(detection.cls[0]), " conf: ",float(detection.conf[0]))
+                        if True:#detection.id is not None:
                             #personDetected = True#Persona detectada
-                            yoloTrackID = int(detection.id.item())
+                            if detection.id != None:
+                                yoloTrackID = int(detection.id.item())
+                            else:
+                                yoloTrackID = -1
 
                             #Si el iD de yolo no esta en mi variable customisada, asignar una
                             if yoloTrackID not in activePersonIds:
@@ -209,28 +203,32 @@ def procesStream():
 
                             face = frame[y1:y2, x1:x2]
                             if face.size == 0:#Si el tamaño de algun rostro detectado es 0, saltar al siguiente frame
+                                print("Face size == 0")
                                 continue
 
                             faceResized = cv2.resize(face, (224, 224))
                             faceArray = np.expand_dims(faceResized, axis=0) / 255.0
 
                             #Prediccion de estado
-                            engagementPrediction = engagementModel.predict(faceArray)
+                            #engagementPrediction = engagementModel.predict(faceArray)
 
-                            if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
-                                predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
-                                predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
+                            #if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
+                            if detection.cls[0] != None:
+                                predictedIndex = int(detection.cls[0])#np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
+
+                                predictedProbabilities = float(detection.conf[0])#engagementPrediction[0][predictedIndex]#Extraer las probabilidades
 
                                 #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
                                 if predictedProbabilities > minConfidence:
                                     engagementState = daiseeLabels[predictedIndex]
                                 else:
+                                    print("####No cumplio el umbral####")
                                     #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
                                     continue
                                     
                                 #Obtener los estados resagados
                                 otherIndex = [i for i in range(len(daiseeLabels)) if i != predictedIndex]
-                                otherLabels = [(daiseeLabels[i], engagementPrediction[0][i]) for i in otherIndex]
+                                #otherLabels = [(daiseeLabels[i], engagementPrediction[0][i]) for i in otherIndex]
 
                                 #Agregar el contador de estado
                                 metrics["stateCounts"][engagementState] += 1
@@ -247,8 +245,8 @@ def procesStream():
                                     "x2": x2,
                                     "y2": y2,
                                     "engagementState": engagementState,
-                                    "predictedProbabilities": predictedProbabilities,
-                                    "otherLabels": otherLabels
+                                    "predictedProbabilities": predictedProbabilities#,
+                                    #"otherLabels": otherLabels
                                 })
 
                 #Actualizar las metricas solo cuando se haya terminado de procesar el frame
@@ -273,7 +271,7 @@ def displayStream():
                     y2 = dataStream[i]["y2"]
                     trackID = dataStream[i]["trackID"]
                     predictedProbabilities = dataStream[i]["predictedProbabilities"]
-                    otherLabels = dataStream[i]["otherLabels"]
+                    #otherLabels = dataStream[i]["otherLabels"]
 
                     #Seleccionar el color correspondiente
                     color = colorList.get(engagementState, (255, 255, 255))  # Blanco por defecto si no se encuentra
@@ -285,9 +283,9 @@ def displayStream():
                     #cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
                     drawCv2Text(frame,f'{trackID} | {engagementState[0:1]} %{round(predictedProbabilities*100)}',(x1, y1 - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,color,(255,255,255),1)
                     #Textos de estados resagados (abajo)
-                    drawCv2Text(frame,
+                    """ drawCv2Text(frame,
                         f'{otherLabels[0][0][0:1]} %{round(otherLabels[0][1]*100)}, {otherLabels[1][0][0:1]} %{round(otherLabels[1][1]*100)},{otherLabels[2][0][0:1]} %{round(otherLabels[2][1]*100)}'
-                        ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
+                        ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1) """
 
                 #region Enviar los frames a la pantalla
 

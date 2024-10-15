@@ -12,16 +12,22 @@
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-07 16:37:06 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
 <Column name="Sensibilidad" id="A9847220-3415-1D5D-7C5D-F2E432512847">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-07 16:37:06 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<ownDataTypeParameters>,2,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
 </columns>

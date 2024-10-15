@@ -12,21 +12,12 @@
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-07 12:52:10 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
-</Column>
-<Column name="SALAS_IdSala" id="41420EEE-A95D-2260-F5C8-B564A9A2D7C0">
-<createdBy>Jordan</createdBy>
-<createdTime>2024-10-07 12:52:52 UTC</createdTime>
-<ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-<previousColumn>false</previousColumn>
-<autoIncrementCycle>false</autoIncrementCycle>
-<associations>
-<colAssociation fkAssociation="F87E2616-A0AD-EDDD-DEB8-AA73B7A48E37" referredColumn="41326A2D-3A46-A2A7-E5C1-A3CD932022EB"/>
-</associations>
 </Column>
 </columns>
 <indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
@@ -39,17 +30,6 @@
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
 <colUsage columnID="DA8C652C-02A2-47BA-A406-DCF2DE9DC727"/>
-</indexColumnUsage>
-</ind_PK_UK>
-<ind_PK_UK id="8BB91DFA-DAF8-D153-36FF-0FACCFDE5F59" name="SECCIONES_SALAS_FK">
-<createdBy>Jordan</createdBy>
-<createdTime>2024-10-07 12:52:52 UTC</createdTime>
-<generatorID>4C720E31-1918-C53B-9CA3-0346BCAEA0A5</generatorID>
-<ownerDesignName>EnganchAI</ownerDesignName>
-<indexState>Foreign Key</indexState>
-<isSurrogateKey>false</isSurrogateKey>
-<indexColumnUsage>
-<colUsage columnID="41420EEE-A95D-2260-F5C8-B564A9A2D7C0"/>
 </indexColumnUsage>
 </ind_PK_UK>
 </indexes>
