@@ -20,7 +20,7 @@
 <ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="Json" id="416CC3FD-998A-9F44-219E-E592CF27F930">
+<Column name="Registro" id="416CC3FD-998A-9F44-219E-E592CF27F930">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>19F3281E-84E2-9BB5-37E0-864F7F781E4E</generatorID>
@@ -31,9 +31,9 @@
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="ASIGNACIONES_idAsignacion" id="016282EF-BA6E-B859-339E-E61FFEB9416F">
+<Column name="ASIGNACIONES_idAsignacion" id="77DB14EE-54F3-52D5-9E62-706127E9B300">
 <createdBy>Jordan</createdBy>
-<createdTime>2024-10-07 12:55:10 UTC</createdTime>
+<createdTime>2024-10-16 14:42:33 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
@@ -43,7 +43,7 @@
 <previousColumn>false</previousColumn>
 <autoIncrementCycle>false</autoIncrementCycle>
 <associations>
-<colAssociation fkAssociation="A6995766-4225-304A-BBFC-B5B4278AE90B" referredColumn="D2DF91E9-B347-7269-82A6-7459FA2F60C7"/>
+<colAssociation fkAssociation="9132EC4D-758F-00AF-BB60-A11FB5A0859E" referredColumn="D2DF91E9-B347-7269-82A6-7459FA2F60C7"/>
 </associations>
 </Column>
 </columns>
@@ -60,24 +60,14 @@
 <colUsage columnID="9B7E0933-8E90-68B0-450C-7D6366CD5B6D"/>
 </indexColumnUsage>
 </ind_PK_UK>
-<ind_PK_UK id="D24EC942-24DD-244B-9BEC-098DBB9CDC5D" name="METRICAS_ID_ASIG_IDX">
+<ind_PK_UK id="6FA8089F-A442-46FF-258D-1B94293F0C4B" name="METRICAS_ASIGNACIONES_FK">
 <createdBy>Jordan</createdBy>
-<createdTime>2024-10-07 16:31:41 UTC</createdTime>
-<ownerDesignName>EnganchAI</ownerDesignName>
-<indexState>Unique Plain Index</indexState>
-<isSurrogateKey>false</isSurrogateKey>
-<indexColumnUsage>
-<colUsage columnID="016282EF-BA6E-B859-339E-E61FFEB9416F"/>
-</indexColumnUsage>
-</ind_PK_UK>
-<ind_PK_UK id="C653B82A-055A-44A5-87E9-B78586AE54B5" name="METRICAS_ASIGNACIONES_FK">
-<createdBy>Jordan</createdBy>
-<createdTime>2024-10-07 12:55:10 UTC</createdTime>
+<createdTime>2024-10-16 14:42:33 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
 <indexState>Foreign Key</indexState>
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
-<colUsage columnID="016282EF-BA6E-B859-339E-E61FFEB9416F"/>
+<colUsage columnID="77DB14EE-54F3-52D5-9E62-706127E9B300"/>
 </indexColumnUsage>
 </ind_PK_UK>
 </indexes>

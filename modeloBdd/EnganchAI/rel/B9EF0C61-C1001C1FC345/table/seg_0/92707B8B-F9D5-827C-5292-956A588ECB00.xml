@@ -19,6 +19,17 @@
 <ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
+<Column name="Nombre" id="BD4E2996-5D76-81BA-3CE2-317493E06591">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:46:03 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
 </columns>
 <indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
 <ind_PK_UK id="42C2A1E7-2C73-9F78-A0A2-8D452B4EAE85" name="SECCIONES_PK">

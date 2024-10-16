@@ -8,21 +8,6 @@
 <existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
 <parsed>true</parsed>
 <columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
-<Column name="SALAS_IdSala" id="B43D688F-5305-DD09-9C9B-9D2694C27FBB">
-<createdBy>Jordan</createdBy>
-<createdTime>2024-10-11 14:39:37 UTC</createdTime>
-<ownerDesignName>EnganchAI</ownerDesignName>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>LOGDT019</logicalDatatype>
-<dataTypePrecision>5</dataTypePrecision>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-<previousColumn>false</previousColumn>
-<autoIncrementCycle>false</autoIncrementCycle>
-<associations>
-<colAssociation fkAssociation="72D7AF95-C1B0-E862-5170-B290A06E08B8" referredColumn="41326A2D-3A46-A2A7-E5C1-A3CD932022EB"/>
-</associations>
-</Column>
 <Column name="SECCIONES_IdSeccion" id="E20D615B-F4FF-5BE0-6AAE-723BB205046A">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-11 14:39:42 UTC</createdTime>
@@ -36,6 +21,21 @@
 <autoIncrementCycle>false</autoIncrementCycle>
 <associations>
 <colAssociation fkAssociation="4A291D6E-A95B-D3BD-9B26-C9F51E634B0C" referredColumn="DA8C652C-02A2-47BA-A406-DCF2DE9DC727"/>
+</associations>
+</Column>
+<Column name="SALAS_IdSala" id="B43D688F-5305-DD09-9C9B-9D2694C27FBB">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-11 14:39:37 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="72D7AF95-C1B0-E862-5170-B290A06E08B8" referredColumn="41326A2D-3A46-A2A7-E5C1-A3CD932022EB"/>
 </associations>
 </Column>
 </columns>

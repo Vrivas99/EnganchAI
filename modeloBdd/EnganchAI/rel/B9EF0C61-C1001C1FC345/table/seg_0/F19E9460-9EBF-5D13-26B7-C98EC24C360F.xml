@@ -20,6 +20,17 @@
 <ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
+<Column name="Nombre" id="7CD646FC-7893-782F-C161-F313F450FA07">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:45:06 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
 <Column name="Correo" id="3B014934-802C-BC9A-3A39-6016EBDB7319">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
@@ -32,7 +43,7 @@
 <ownDataTypeParameters>40,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="Contraseña" id="3B82A6F2-21F2-9A0B-9A5A-AB5FE5CB89C0">
+<Column name="Contrasenna" id="3B82A6F2-21F2-9A0B-9A5A-AB5FE5CB89C0">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>F806B5DC-E9A7-EBAD-55DF-A889BC222889</generatorID>
@@ -48,6 +59,7 @@
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-07 16:32:11 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
 <useDomainConstraints>false</useDomainConstraints>
 <use>1</use>
 <logicalDatatype>LOGDT029</logicalDatatype>

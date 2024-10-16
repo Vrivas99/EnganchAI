@@ -12,8 +12,8 @@ app.use(cors());//Necesario para la conexion con el frontend
 app.use(express.json());
 
 //Routes
-app.use(require('./routes/flask'));
-app.use(require('./routes/dBApi'));
+app.use('/api',require('./routes/flask'));
+app.use('/db',require('./routes/dBApi'));
 
 //Iniciar servidor
 app.listen(app.get('port'), () => {
