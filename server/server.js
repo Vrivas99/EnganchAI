@@ -18,5 +18,6 @@ app.use('/db',require('./routes/dBApi'));
 //Iniciar servidor
 app.listen(app.get('port'), () => {
     console.log("Server ejecutandose en http://localhost:"+app.get('port'));
-    console.log("flask metrics API: http://localhost:"+app.get('port')+"/metrics")
+    console.log("flask API: http://localhost:"+app.get('port')+"/api/")
+    console.log("db API: http://localhost:"+app.get('port')+"/db/")
 });

@@ -6,6 +6,26 @@ let flaskIP = '127.0.0.1:5001';
 
 let currentMetrics = null
 
+//Almacenar metricas en la BD
+let sessionMetrics = [];  //Metricas totales de la sesion
+let currentSecond = 0;    //Segundo actual de la sesion
+let storeFrequency = 5;   //Cada cuantos segundos se almacenaran las metricas
+let lastStoredSecond = 0; //Ultimo segundo que se almaceno las metricas
+
+//Funciones sin API
+async function sessionMetricsDB(metric){
+    // Enviar las métricas a /db para almacenarlas en la base de datos
+    try {
+        await axios.post('http://localhost:5000/db/storeSessionMetrics', {
+            metrics: JSON.stringify(metric)//Asegurarse que esten en formato JSON
+        });
+        console.log('Metricas enviadas a la API');
+    } catch (dbError) {
+        console.error('Error enviando las metricas:', dbError);
+    }
+}
+
+//Rutas de API
 router.get('/flaskStream', async (req, res) => {
     try {
         const response = await axios({
@@ -32,8 +52,23 @@ router.get('/metrics', async (req, res) => {
             method: 'GET',
             responseType: 'json',
         });
-        currentMetrics = response.data;
-        console.log('Metrics updated:', currentMetrics);//Actualiza las metricas
+        currentMetrics = response.data;//Metricas recibidas/actuales
+
+        //ALmacenar metricas de la sesion cada X segundos
+        if (currentSecond - lastStoredSecond >= storeFrequency) {
+            const totalPeople = currentMetrics.totalPeople;
+            const engagedCount = currentMetrics.stateCounts.Engaged || 0;
+
+            sessionMetrics.push({
+                second: currentSecond,
+                totalPeople: totalPeople,
+                engagedCount: engagedCount
+            });
+
+            lastStoredSecond = currentSecond;//Actualiza ultimo segundo almacenado
+        }
+        currentSecond++;//Contador de segundos (Temporal)
+
         res.json(currentMetrics);
     } catch (error) {
         console.error('Error fetching metrics:', error);
@@ -74,7 +109,7 @@ router.post('/setConfidence', async (req, res) => {
     }
 });
 
-//Activar o desactivar video (Para evitar desincronizacion)
+//Inicia/Finaliza la sesion (Activa/desactiva video para evitar desincronizacion)
 router.post('/setVideoStream', async (req, res) => {
     const { newState } = req.body;
 
@@ -84,6 +119,13 @@ router.post('/setVideoStream', async (req, res) => {
         const response = await axios.post(`http://${flaskIP}/setVideoStream`, {
             processVideo: newState
         });
+
+        if (newState == false){
+            console.log("Metricas de sesion finalizada: ")
+            console.log(sessionMetrics)
+            sessionMetricsDB(sessionMetrics)//Enviar las metricas a /db
+        }
+        
 
         // Devolver la respuesta a Express
         res.status(200).send(response.data);
