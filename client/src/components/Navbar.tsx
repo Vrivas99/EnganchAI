@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner"
 
 const Navbar = () => {
-    const { isRecording, handleRecording } = useRecording(); // Usa el estado global
+    const { isRecording, handleRecording, setSessionTime } = useRecording(); // Usa el estado global
     const [timer, setTimer] = useState(0);
     const [toastShown, setToastShown] = useState(false);
     const pathname = usePathname(); // Obtener la ruta actual
@@ -70,6 +70,8 @@ const Navbar = () => {
     const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
+        }else {
+            setSessionTime(timer);
         }
         handleRecording(); // Cambia el estado de grabación
         setVideoStream()//Establece video en flask

@@ -2,6 +2,7 @@
 import { FaPlus } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
 import { useMetrics } from "@/context/MetricsContext";
+import { useRecording } from "@/context/RecordingContext";
 
 import {
     Sheet,
@@ -14,6 +15,15 @@ import {
 
 const Aside = () => {
     const { metrics, isSessionEnded, sessionReport } = useMetrics(); 
+    const { sessionTime } = useRecording();
+    const date = new Date();
+    const currentDate = date.toLocaleDateString();
+
+    const formatTime = (time: number) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      };
 
     return (
         <Sheet>
@@ -30,7 +40,7 @@ const Aside = () => {
                 <SheetHeader>
                     <SheetTitle>
                         <span className="text-gray-900 py-2 font-bold">
-                            {isSessionEnded ? 'Informe de la sesión' : 'Métricas en vivo'}
+                            {isSessionEnded ? 'Informe de ultima sesión' : 'Métricas en vivo'}
                         </span>
                     </SheetTitle>
                     <SheetDescription>
@@ -44,13 +54,11 @@ const Aside = () => {
                 <div className="mt-4">
                     {/* se muestra el informe si termina la captura */}
                     {isSessionEnded && sessionReport ? (
-                        <div>
+                        <div className="flex justify-center flex-col w-full items-center gap-7">
                             {/* informe */}
-                            <p>Total de estudiantes monitoreados: {sessionReport?.totalPeople || 0}</p>
-                            <p>Engaged: {sessionReport?.stateCounts?.Engaged || 0}</p>
-                            <p>Frustrated: {sessionReport?.stateCounts?.Frustrated || 0}</p>
-                            <p>Confused: {sessionReport?.stateCounts?.Confused || 0}</p>
-                            <p>Bored: {sessionReport?.stateCounts?.Bored || 0}</p>
+                            <p className=" font-semibold">{currentDate}</p>
+                            <p>Total de estudiantes: {sessionReport?.totalPeople || 0}</p>
+                            <p>Tiempo de sesión: {formatTime(sessionTime)}</p>
                         </div>
                     ) : (
                         // metricas en tiempo real
