@@ -2,6 +2,8 @@ const { Router } = require('express');
 const router = Router();
 const { getDBConnection } = require('./dBConnect')
 const oracledb = require('oracledb'); //Para utilizar outFormat
+// bcryptjs 
+const jsonwebtoken = require('jsonwebtoken')
 
 //api de prueba, borrar despues
 router.get('/getTestUsers', async (req,res) => {
@@ -27,10 +29,26 @@ router.get('/login', async(req,res) =>{
             { correo: 'correo@prueba.cl', contrasenna: '1234'}, 
             { outFormat: oracledb.OBJECT }
         );
+
+        //Login no exitoso
+        if (result.rows[0]["COUNT(*)"] != 1){
+            res.status(400).json({ error: 'Usuario y/o contraseña invalidos' });
+        }
+        const token = jsonwebtoken.sign({user:'correo@prueba.cl'},
+            process.env.JWTSECRET, 
+            {expiresIn:process.env.JWTEXPIRATION})
+        
+        //Crear cookie del login
+        const cookieLogin = {
+            expires: new Date(Date.now() + process.env.JWTCOOKIEEXPIRE * 24 * 60 * 60 * 1000),//Transformar el numero a dias
+            path: "/"
+        }
+
+        //Enviar cookie al cliente
+        res.cookie("jwt", token, cookieLogin);
         res.status(201).json({ message: 'RESULT:', result });
-        console.log("Query res: ",result.rows)
     } catch(err){
-        res.status(500).json({ error: 'Usuario y/o contraseña invalidos' });
+        res.status(400).json({ error: 'Usuario y/o contraseña invalidos' });
     }
 });
 
