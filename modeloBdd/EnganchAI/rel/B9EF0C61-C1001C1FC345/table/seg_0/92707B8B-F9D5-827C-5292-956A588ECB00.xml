@@ -1,0 +1,47 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="92707B8B-F9D5-827C-5292-956A588ECB00" name="SECCIONES">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:51:47 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<ordsAlias>table_5</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="IdSeccion" id="DA8C652C-02A2-47BA-A406-DCF2DE9DC727">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:52:10 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Nombre" id="BD4E2996-5D76-81BA-3CE2-317493E06591">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:46:03 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="42C2A1E7-2C73-9F78-A0A2-8D452B4EAE85" name="SECCIONES_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:52:10 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="DA8C652C-02A2-47BA-A406-DCF2DE9DC727"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

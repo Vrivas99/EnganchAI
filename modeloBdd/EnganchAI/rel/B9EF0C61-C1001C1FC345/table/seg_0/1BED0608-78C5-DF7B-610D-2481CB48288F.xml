@@ -13,41 +13,37 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>F906920D-D5EE-CE86-C198-9C61BAD2B720</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="Json" id="416CC3FD-998A-9F44-219E-E592CF27F930">
+<Column name="Registro" id="416CC3FD-998A-9F44-219E-E592CF27F930">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>19F3281E-84E2-9BB5-37E0-864F7F781E4E</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>47823B89-BECE-2D4A-B641-EE3BE6149078</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="Asignaciones_USUARIOS(PROFESORES)_Id" id="FD5E745A-1641-561D-910F-E1EB4678D983">
+<Column name="ASIGNACIONES_idAsignacion" id="77DB14EE-54F3-52D5-9E62-706127E9B300">
 <createdBy>Jordan</createdBy>
-<createdTime>2024-10-03 13:23:23 UTC</createdTime>
+<createdTime>2024-10-16 14:42:33 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <previousColumn>false</previousColumn>
 <autoIncrementCycle>false</autoIncrementCycle>
 <associations>
-<colAssociation fkAssociation="16752D66-FB98-30C6-D301-443E5C4769A4" referredColumn="03B9B0A6-F87B-06E4-1718-AD6B77FB2A01"/>
-</associations>
-</Column>
-<Column name="Asignaciones_SALAS(CAMARAS)_Id" id="CD00A6FB-CF23-39F0-121F-955837B57ADE">
-<createdBy>Jordan</createdBy>
-<createdTime>2024-10-03 13:23:23 UTC</createdTime>
-<ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-<previousColumn>false</previousColumn>
-<autoIncrementCycle>false</autoIncrementCycle>
-<associations>
-<colAssociation fkAssociation="16752D66-FB98-30C6-D301-443E5C4769A4" referredColumn="6C31794E-8ADC-2C6C-F566-4FF9AD628314"/>
+<colAssociation fkAssociation="9132EC4D-758F-00AF-BB60-A11FB5A0859E" referredColumn="D2DF91E9-B347-7269-82A6-7459FA2F60C7"/>
 </associations>
 </Column>
 </columns>
@@ -64,15 +60,14 @@
 <colUsage columnID="9B7E0933-8E90-68B0-450C-7D6366CD5B6D"/>
 </indexColumnUsage>
 </ind_PK_UK>
-<ind_PK_UK id="F73274DC-2599-7081-EDE0-3CBAB16F4C81" name="METRICAS_Asignaciones_FK">
+<ind_PK_UK id="6FA8089F-A442-46FF-258D-1B94293F0C4B" name="METRICAS_ASIGNACIONES_FK">
 <createdBy>Jordan</createdBy>
-<createdTime>2024-10-03 13:23:23 UTC</createdTime>
+<createdTime>2024-10-16 14:42:33 UTC</createdTime>
 <ownerDesignName>EnganchAI</ownerDesignName>
 <indexState>Foreign Key</indexState>
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
-<colUsage columnID="FD5E745A-1641-561D-910F-E1EB4678D983"/>
-<colUsage columnID="CD00A6FB-CF23-39F0-121F-955837B57ADE"/>
+<colUsage columnID="77DB14EE-54F3-52D5-9E62-706127E9B300"/>
 </indexColumnUsage>
 </ind_PK_UK>
 </indexes>

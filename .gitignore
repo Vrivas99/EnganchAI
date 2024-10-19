@@ -60,13 +60,11 @@ Thumbs.db
 *.swo
 
 # ML
-.pt
 .h5
-*.pt
 *.h5
-/*.pt
 /*.h5
 server/modelo_cnn_knn.h5
-server/yolov8n.pt
 server/modelo_cnn_knn.h5
 /server/TestVideos
+server/Wallet_ENGANCHAIWWMTFUA9UICVJPXU.zip
+/server/Wallet_ENGANCHAIWWMTFUA9UICVJPXU
