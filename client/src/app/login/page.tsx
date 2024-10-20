@@ -11,7 +11,6 @@ export default function Login() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
 
     // Funciones de validación
     const validateEmail = (email: string) => {
@@ -24,7 +23,7 @@ export default function Login() {
         return passwordPattern.test(password);
     };
     // Función para manejar el inicio de sesión
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!email || !password) {
@@ -42,9 +41,27 @@ export default function Login() {
             return;
         }
 
-        // Si todo está correcto, redirigir al usuario a la página de selección de clase
-        toast.success('Inicio de sesión exitoso');
-        router.push('/select-class');
+        // Enviar solicitud al backend para validar el login
+        try {
+            const response = await fetch('http://localhost:5000/db/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success('Inicio de sesión exitoso');
+                router.push('/select-class');
+            } else {
+                toast.error(data.error || 'Usuario y/o contraseña incorrectos');
+            }
+        } catch (error) {
+            toast.error('Error en el servidor. Inténtelo más tarde.');
+        }
     };
 
     return (

@@ -75,7 +75,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
             return;
         }
 
-        // Si todo está correcto, cerrar el diálogo de login y abrir el de configuración
+        //cerrar el diálogo de login y abrir el de configuración
         toast.success('Inicio de sesión exitoso');
         getConfidence();//Recoge la confianza actual de flask para que actualice la barra
         setIsConfigVisible(true);
@@ -115,6 +115,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                                 type="text"
                                 id='user'
                                 placeholder="Usuario"
+                                autoComplete='off'
                                 value={user}
                                 onChange={(e) => setUser(e.target.value)}
                                 className="w-full p-2 border border-gray-300 rounded"
@@ -122,6 +123,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                             <input
                                 type="password"
                                 id='password'
+                                autoComplete='off'
                                 placeholder="Contraseña"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}

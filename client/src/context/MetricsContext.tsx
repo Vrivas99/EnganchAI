@@ -11,14 +11,14 @@ interface Metric {
 }
 
 interface MetricsResponse {
-    Ids: {}; // Un diccionario con las IDs y sus métricas
+    Ids: Record<string, Metric>; // Un diccionario con las IDs y sus métricas
     stateCounts: {
-        Bored: 0;
-        Confused: 0;
-        Engaged: 0;
-        Frustrated: 0;
+        Bored: number;
+        Confused: number;
+        Engaged: number;
+        Frustrated: number;
     };
-    totalPeople: 0;
+    totalPeople: number;
 }
 
 interface MetricsContextType {
@@ -53,15 +53,26 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
             // Hace la solicitud a la API de métricas solo cuando se esté grabando
             const fetchMetrics = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/metrics');
+                    const response = await fetch('http://127.0.0.1:5001/metrics',
+                        {
+                            mode: 'cors', 
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',
+                            },
+                        }
+                    )
                     const data = await response.json();
-                    setMetrics(data);
+
+                    // Verificar si data tiene la estructura esperada
+                    if (data && data.Ids && data.stateCounts && data.totalPeople) {
+                        setMetrics(data);
+                    } else {
+                        console.error('Estructura de datos inválida:', data);
+                    }
                 } catch (error) {
                     console.error('Error al obtener las métricas:', error);
                 }
             };
-
-            fetchMetrics();
             interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1
         } else if (!isRecording && metrics) {
             setSessionReport(metrics);
@@ -72,7 +83,7 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
     }, [isRecording]); // Dependencia de isRecording
 
     return (
-        <MetricsContext.Provider value={{ metrics, isSessionEnded, sessionReport}}>
+        <MetricsContext.Provider value={{ metrics, isSessionEnded, sessionReport }}>
             {children}
         </MetricsContext.Provider>
     );
