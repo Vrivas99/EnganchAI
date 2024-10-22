@@ -8,9 +8,8 @@ const jsonwebtoken = require('jsonwebtoken')
 //Middleware de usuario
 function validateToken(req, res, next){
     const accessToken = req.cookies.jwt
-    if (!accessToken) return res.send('Acceso denegado');
-
-    console.log("access Token: ", accessToken)
+    if (!accessToken) return res.status(403).json({ message: 'Acceso denegado' });
+    
     try{
         const userToken = jsonwebtoken.verify(accessToken, process.env.JWTSECRET)
         req.body.correo = userToken.user;
@@ -22,7 +21,7 @@ function validateToken(req, res, next){
     }catch(err){
         res.clearCookie("jwt");
         console.log("error message: ",err.message)
-        return res.send('Acceso denegado, token expirado o incorrecto');
+        return res.status(403).json({ message: 'Acceso denegado, token expirado o incorrecto' });
     }
 }
 
@@ -69,6 +68,28 @@ router.post('/login', async(req,res) =>{
         return res.status(400).json({ error: 'Usuario y/o contraseña invalidos', err: err.message });
     }
 });
+
+//get y validacion de JWT para frontend
+//Recoger JWT
+router.get('/getToken', validateToken, (req, res) => {
+    res.status(200).json({
+        correo: req.body.correo,
+        id: req.body.id,
+        name: req.body.Name,
+        avatar: req.body.Avatar,
+        config: req.body.Config
+    });
+});
+//Validar existencia de token
+router.get('/validateToken', validateToken, (req, res) => {
+    res.status(200).json({ message: 'Token Ok' });
+});
+//Clear Token (para pruebas o cerrar sesion)
+router.get('/deleteToken', validateToken, (req, res) => {
+    res.clearCookie("jwt");
+    res.status(200).json({ message: 'Token Eliminado' });
+});
+
 
 //Recoger datos del usuario despues del login (se valida el token)
 //Actualmente, los datos que se recuperan aqui estan dentro del token (/login), si en un futuro se decide no guardar esa informacion, se debe eliminar los datos del token y ocupar esta funcion
