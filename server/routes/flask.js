@@ -4,13 +4,12 @@ const axios = require('axios');
 
 let flaskIP = '127.0.0.1:5001';
 
-let currentMetrics = null
-
 //Almacenar metricas en la BD
-let sessionMetrics = [];  //Metricas totales de la sesion
-let currentSecond = 0;    //Segundo actual de la sesion
-let storeFrequency = 5;   //Cada cuantos segundos se almacenaran las metricas
-let lastStoredSecond = 0; //Ultimo segundo que se almaceno las metricas
+let currentMetrics = null;
+let sessionMetrics = [];//Metricas totales de la sesion    
+let currentSecond = 0;//Segundo actual de la sesion
+const storeFrequency = 1;   //Cada cuantos segundos se almacenaran las metricas
+let lastStoredSecond = 0;//Ultimo segundo que se almaceno las metricas
 
 //Funciones sin API
 async function sessionMetricsDB(metric){
@@ -47,29 +46,31 @@ router.get('/flaskStream', async (req, res) => {
 //Recoger metricas
 router.get('/metrics', async (req, res) => {
     try {
+        console.log("get metricas")
+
+        //Recoje las metricas desde flask
         const response = await axios({
             url: `http://${flaskIP}/metrics`,
             method: 'GET',
             responseType: 'json',
         });
+
         currentMetrics = response.data;//Metricas recibidas/actuales
 
         //ALmacenar metricas de la sesion cada X segundos
         if (currentSecond - lastStoredSecond >= storeFrequency) {
-            const totalPeople = currentMetrics.totalPeople;
-            const engagedCount = currentMetrics.stateCounts.Engaged || 0;
-
+            console.log("SessionMetrics push")
             sessionMetrics.push({
                 second: currentSecond,
-                totalPeople: totalPeople,
-                engagedCount: engagedCount
+                totalPeople: response.data.totalPeople,
+                engagedCount: response.data.stateCounts.Engaged || 0
             });
 
             lastStoredSecond = currentSecond;//Actualiza ultimo segundo almacenado
         }
         currentSecond++;//Contador de segundos (Temporal)
 
-        res.json(currentMetrics);
+        res.json(response.data);
     } catch (error) {
         console.error('Error fetching metrics:', error);
     }
@@ -122,7 +123,6 @@ router.post('/setVideoStream', async (req, res) => {
 
         if (newState == false){
             console.log("Metricas de sesion finalizada: ")
-            console.log(sessionMetrics)
             sessionMetricsDB(sessionMetrics)//Enviar las metricas a /db
         }
         

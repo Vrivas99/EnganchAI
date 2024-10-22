@@ -24,7 +24,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
     //Actualizar la barra de confianza
     const getConfidence = async () =>{
         try {
-            const response = await fetch('http://localhost:5000/getConfidence');
+            const response = await fetch('http://localhost:5000/api/getConfidence');
             if (!response.ok) {
                 throw new Error('Error fetching confidence');
             }
@@ -39,7 +39,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
     //Actualizar la confianza en flask
     const setConfidence = async () => {
         try {
-            const response = await fetch('http://localhost:5000/setConfidence', {
+            const response = await fetch('http://localhost:5000/api/setConfidence', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

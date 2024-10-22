@@ -50,7 +50,7 @@ const Navbar = () => {
     //Realiza un POST hacia el server de express para cambiar el estado del stream
     const setVideoStream = async () => {
         try {
-            const response = await fetch('http://localhost:5000/setVideoStream', {
+            const response = await fetch('http://localhost:5000/api/setVideoStream', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,3 +1,4 @@
+#Instalar paquetes con "pip install -r requirements.txt"
 from flask import Flask, Response, jsonify, request
 import cv2
 import numpy as np
@@ -14,9 +15,6 @@ import queue
 q=queue.Queue(maxsize=1)#procesStream()
 q2=queue.Queue(maxsize=2)#displayStream()
 import threading
-
-#pip install flask opencv-python-headless tensorflow ultralytics python-dotenv [torch, solo si flask lo pide]
-#Necesita un modelo .h5 que pesa mas del limite de github, descargar para probar
 
 app = Flask(__name__)
 

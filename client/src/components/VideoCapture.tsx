@@ -16,7 +16,7 @@ const VideoCapture: React.FC = () => {
       setStreamError(false);
 
       // Establece la URL de la transmisión de video desde el backend
-      videoRef.current.src = 'http://localhost:5000/flaskStream';
+      videoRef.current.src = 'http://localhost:5000/api/flaskStream';
       
       // Verifica si hay un error al cargar el stream
       videoRef.current.onerror = () => {

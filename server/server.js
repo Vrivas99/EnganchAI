@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,8 @@ app.set('port', process.env.PORT || 5000)
 //Middlewares
 app.use(cors());//Necesario para la conexion con el frontend
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));//Para parsear req.bodies en formato application/x-www-form-urlencoded
+app.use(cookieParser());//Parsear Cookies (Leer JWT)
 
 //Routes
 app.use('/api',require('./routes/flask'));
