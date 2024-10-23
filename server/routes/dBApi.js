@@ -19,20 +19,32 @@ router.get('/getTestUsers', async (req,res) => {
 });
 
 //Realiza el login
-router.get('/login', async(req,res) =>{
-    try{
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
         const oracle = await getDBConnection();
         const result = await oracle.execute(
-            'SELECT COUNT(*) FROM USUARIOS WHERE CORREO=:correo AND CONTRASENNA=:contrasenna',
-            { correo: 'correo@prueba.cl', contrasenna: '1234'}, 
+            'SELECT COUNT(*) AS user_count FROM USUARIOS WHERE CORREO=:correo AND CONTRASENNA=:contrasenna',
+            { correo: email, contrasenna: password }, 
             { outFormat: oracledb.OBJECT }
         );
-        res.status(201).json({ message: 'RESULT:', result });
-        console.log("Query res: ",result.rows)
-    } catch(err){
-        res.status(500).json({ error: 'Usuario y/o contraseña invalidos' });
+
+        const userCount = result.rows[0].USER_COUNT;
+
+        if (userCount > 0) {
+            res.status(200).json({ message: 'Inicio de sesión exitoso' });
+        } else {
+            res.status(401).json({ error: 'Usuario y/o contraseña incorrectos' });
+        }
+
+        console.log("Query res: ", result.rows);
+    } catch (err) {
+        console.error('Error del back', err);
+        res.status(500).json({ error: 'Error en el servidor. Inténtelo más tarde.' });
     }
 });
+
 
 //Recoger datos del usuario despues del login
 router.get('/getUserData', async(req,res) =>{

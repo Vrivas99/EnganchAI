@@ -53,7 +53,7 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
             // Hace la solicitud a la API de métricas solo cuando se esté grabando
             const fetchMetrics = async () => {
                 try {
-                    const response = await fetch('http://127.0.0.1:5001/metrics',
+                    const response = await fetch('http://localhost:5000/api/metrics',
                         {
                             mode: 'cors', 
                             headers: {

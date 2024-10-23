@@ -50,7 +50,7 @@ activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 load_dotenv()
 userCam = os.getenv('CAMERAUSER')
 passCam = os.getenv('CAMERAPASS')
-camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
+camLink = 0#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
 processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)

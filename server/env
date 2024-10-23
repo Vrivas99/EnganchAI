@@ -1,9 +1,0 @@
-CAMERAUSER=rtsp
-CAMERAPASS=Aa5DdOnSw
-DBUSER=ADMIN
-DBPASS=3ng4nchAI4adm1nUs3r
-DBCONSTRING=(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-saopaulo-1.oraclecloud.com))(connect_data=(service_name=gc78895a04fdbd9_enganchaiwwmtfua9uicvjpxu_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
-DBWALLPASS=Enganchadm1n
-JWTSECRET=HOLAHOLA123
-JWTEXPIRATION=7d
-JWTCOOKIEEXPIRE=1

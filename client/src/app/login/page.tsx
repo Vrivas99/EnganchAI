@@ -57,7 +57,7 @@ export default function Login() {
                 toast.success('Inicio de sesión exitoso');
                 router.push('/select-class');
             } else {
-                toast.error(data.error || 'Usuario y/o contraseña incorrectos');
+                toast.error(data.error || 'Usuario y/o contraseña incorrectos front');
             }
         } catch (error) {
             toast.error('Error en el servidor. Inténtelo más tarde.');
