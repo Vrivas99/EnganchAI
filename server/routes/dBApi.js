@@ -20,7 +20,6 @@ function validateToken(req, res, next){
         next()
     }catch(err){
         res.clearCookie("jwt");
-        console.log("error message: ",err.message)
         return res.status(403).json({ message: 'Acceso denegado, token expirado o incorrecto' });
     }
 }
@@ -63,7 +62,7 @@ router.post('/login', async(req,res) =>{
 
         //Enviar cookie al cliente
         res.cookie("jwt", token, cookieLogin);
-        return res.status(201).json({ message: 'RESULT:', result });
+        return res.status(201).json({ data: result.rows });
     } catch(err){
         return res.status(400).json({ error: 'Usuario y/o contraseña invalidos', err: err.message });
     }
@@ -80,10 +79,12 @@ router.get('/getToken', validateToken, (req, res) => {
         config: req.body.Config
     });
 });
+
 //Validar existencia de token
 router.get('/validateToken', validateToken, (req, res) => {
     res.status(200).json({ message: 'Token Ok' });
 });
+
 //Clear Token (para pruebas o cerrar sesion)
 router.get('/deleteToken', validateToken, (req, res) => {
     res.clearCookie("jwt");
@@ -95,7 +96,7 @@ router.get('/deleteToken', validateToken, (req, res) => {
 //Actualmente, los datos que se recuperan aqui estan dentro del token (/login), si en un futuro se decide no guardar esa informacion, se debe eliminar los datos del token y ocupar esta funcion
 router.get('/getUserData', validateToken, async(req,res) =>{
     try{
-        const { correo } = req.body;
+        const { correo } = req.body.correo;
 
         console.log("Correo: ", correo)
 
@@ -105,8 +106,7 @@ router.get('/getUserData', validateToken, async(req,res) =>{
             { correo: correo}, 
             { outFormat: oracledb.OBJECT }
         );
-        res.status(201).json({ message: 'RESULT:', result });
-        console.log("Query res: ",result.rows)
+        res.status(201).json({ data: result.rows });
     } catch(err){
         console.error('Error details:', err);
         res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
@@ -152,9 +152,11 @@ router.get('/UpdateUserConfidence', async(req,res) =>{
 });
 
 //Recoge las asignaciones (Secciones+salas)
-router.get('/getUserAsignation', async(req,res) =>{
+router.get('/getUserAsignation', validateToken, async(req,res) =>{
     try{
-        const { usuarioID } = req.body;
+        const usuarioID = req.body.id;
+
+        console.log("user asignation, id: ",usuarioID)
 
         const oracle = await getDBConnection();
         const result = await oracle.execute(
@@ -162,7 +164,7 @@ router.get('/getUserAsignation', async(req,res) =>{
             { idUsuario: usuarioID}, 
             { outFormat: oracledb.OBJECT }
         );
-        res.status(201).json({ message: 'RESULT:', result });
+        res.status(201).json({ data: result.rows });
         console.log("Query res: ",result.rows)
     } catch(err){
         console.error('Error details:', err);
@@ -171,7 +173,7 @@ router.get('/getUserAsignation', async(req,res) =>{
 });
 
 //Link de camara de la sala actual
-router.get('/getCameraLink', async(req,res) =>{
+router.post('/getCameraLink', async(req,res) =>{
     try{
         const { salaID } = req.body;
 
@@ -181,10 +183,8 @@ router.get('/getCameraLink', async(req,res) =>{
             { idSala: salaID}, 
             { outFormat: oracledb.OBJECT }
         );
-        res.status(201).json({ message: 'RESULT:', result });
-        console.log("Query res: ",result.rows)
+        res.status(201).json({ data: result.rows });
     } catch(err){
-        console.error('Error details:', err);
         res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
     }
 });
@@ -201,10 +201,8 @@ router.post('/storeSessionMetrics', async(req,res) =>{
             { autoCommit: true }//Asegura el commit
         );
 
-        res.status(201).json({ message: 'Metricas almacenadas:', result });
-        console.log("Metricas almacenadas",result)
+        res.status(201).json({ data: result.rows });
     } catch(err){
-        console.error('Error details:', err);
         res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
     }
 });

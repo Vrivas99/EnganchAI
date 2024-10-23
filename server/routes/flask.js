@@ -137,7 +137,7 @@ router.post('/setVideoStream', async (req, res) => {
 
 //Cambiar el link de la camara
 router.post('/setCamLink', async (req, res) => {
-    const camValue = req.query.v;
+    const { camValue } = req.body.link;
 
     if (camValue) {
         try {
