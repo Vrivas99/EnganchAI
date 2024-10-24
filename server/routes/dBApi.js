@@ -24,6 +24,98 @@ function validateToken(req, res, next){
     }
 }
 
+//////////////
+//GET (Los datos no se envian desde el frontend o no requiere datos)
+//////////////
+//get y validacion de JWT para frontend
+//Recoger JWT
+router.get('/getToken', validateToken, (req, res) => {
+    res.status(200).json({
+        correo: req.body.correo,
+        id: req.body.id,
+        name: req.body.Name,
+        avatar: req.body.Avatar,
+        config: req.body.Config
+    });
+});
+
+
+//Validar existencia de token
+router.get('/validateToken', validateToken, (req, res) => {
+    res.status(200).json({ message: 'Token Ok' });
+});
+
+//Clear Token (para pruebas o cerrar sesion)
+router.get('/deleteToken', validateToken, (req, res) => {
+    res.clearCookie("jwt");
+    res.status(200).json({ message: 'Token Eliminado' });
+});
+
+//Recoger datos del usuario despues del login (se valida el token)
+//Actualmente, los datos que se recuperan aqui estan dentro del token (/login), si en un futuro se decide no guardar esa informacion, se debe eliminar los datos del token y ocupar esta funcion
+router.get('/getUserData', validateToken, async(req,res) =>{
+    try{
+        const { correo } = req.body.correo;
+
+        console.log("Correo: ", correo)
+
+        const oracle = await getDBConnection();
+        const result = await oracle.execute(
+            'SELECT IDUSUARIO, NOMBRE, AVATAR FROM USUARIOS WHERE CORREO=:correo',
+            { correo: correo}, 
+            { outFormat: oracledb.OBJECT }
+        );
+        res.status(201).json({ data: result.rows });
+    } catch(err){
+        console.error('Error details:', err);
+        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
+    }
+});
+
+//Recoger configuraciones del usuario
+router.get('/getUserConfidence', validateToken, async(req,res) =>{
+    try{
+        const correo = req.body.correo;
+
+        const oracle = await getDBConnection();
+        const result = await oracle.execute(
+            'SELECT CF.SENSIBILIDAD FROM CONFIGURACIONES CF JOIN USUARIOS US ON CF.IDCONFIGURACION=US.CONFIG_IDCONFIGURACION WHERE CORREO=:correo',
+            { correo: correo}, 
+            { outFormat: oracledb.OBJECT }
+        );
+        res.status(201).json({ data: result.rows });
+        console.log("Query res: ",result.rows)
+    } catch(err){
+        console.error('Error details:', err);
+        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
+    }
+});
+
+//Recoge las asignaciones (Secciones+salas)
+router.get('/getUserAsignation', validateToken, async(req,res) =>{
+    try{
+        const usuarioID = req.body.id;
+
+        console.log("user asignation, id: ",usuarioID)
+
+        const oracle = await getDBConnection();
+        const result = await oracle.execute(
+            'SELECT AG.IDASIGNACION, SC.IDSECCION AS ID_SECCION, SC.NOMBRE AS SECCION, SL.IDSALA AS ID_SALA ,SL.NOMBRE AS SALA FROM ASIGNACIONES AG JOIN USUARIOS US ON AG.USUARIOS_IDUSUARIO=US.IDUSUARIO JOIN SECCIONES SC ON AG.SALAS_SECCIONES_SECCIONES_IDSECCION=SC.IDSECCION JOIN SALAS SL ON AG.SALAS_SECCIONES_SALAS_IDSALA=SL.IDSALA WHERE AG.USUARIOS_IDUSUARIO=:idUsuario',
+            { idUsuario: usuarioID}, 
+            { outFormat: oracledb.OBJECT }
+        );
+        res.status(201).json({ data: result.rows });
+        console.log("Query res: ",result.rows)
+    } catch(err){
+        console.error('Error details:', err);
+        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
+    }
+});
+
+
+//////////////
+//POST (Uno o mas datos deben ser enviados desde el frontend)
+//////////////
 //Realiza el login
 router.post('/login', async(req,res) =>{
     try{
@@ -68,74 +160,12 @@ router.post('/login', async(req,res) =>{
     }
 });
 
-//get y validacion de JWT para frontend
-//Recoger JWT
-router.get('/getToken', validateToken, (req, res) => {
-    res.status(200).json({
-        correo: req.body.correo,
-        id: req.body.id,
-        name: req.body.Name,
-        avatar: req.body.Avatar,
-        config: req.body.Config
-    });
-});
-
-//Validar existencia de token
-router.get('/validateToken', validateToken, (req, res) => {
-    res.status(200).json({ message: 'Token Ok' });
-});
-
-//Clear Token (para pruebas o cerrar sesion)
-router.get('/deleteToken', validateToken, (req, res) => {
-    res.clearCookie("jwt");
-    res.status(200).json({ message: 'Token Eliminado' });
-});
-
-
-//Recoger datos del usuario despues del login (se valida el token)
-//Actualmente, los datos que se recuperan aqui estan dentro del token (/login), si en un futuro se decide no guardar esa informacion, se debe eliminar los datos del token y ocupar esta funcion
-router.get('/getUserData', validateToken, async(req,res) =>{
-    try{
-        const { correo } = req.body.correo;
-
-        console.log("Correo: ", correo)
-
-        const oracle = await getDBConnection();
-        const result = await oracle.execute(
-            'SELECT IDUSUARIO, NOMBRE, AVATAR FROM USUARIOS WHERE CORREO=:correo',
-            { correo: correo}, 
-            { outFormat: oracledb.OBJECT }
-        );
-        res.status(201).json({ data: result.rows });
-    } catch(err){
-        console.error('Error details:', err);
-        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
-    }
-});
-
-//Recoger configuraciones del usuario
-router.get('/getUserConfidence', validateToken, async(req,res) =>{
-    try{
-        const { correo } = req.body;
-
-        const oracle = await getDBConnection();
-        const result = await oracle.execute(
-            'SELECT CF.SENSIBILIDAD FROM CONFIGURACIONES CF JOIN USUARIOS US ON CF.IDCONFIGURACION=US.CONFIG_IDCONFIGURACION WHERE CORREO=:correo',
-            { correo: correo}, 
-            { outFormat: oracledb.OBJECT }
-        );
-        res.status(201).json({ message: 'RESULT:', result });
-        console.log("Query res: ",result.rows)
-    } catch(err){
-        console.error('Error details:', err);
-        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
-    }
-});
-
 //Actualizar configuraciones del usuario
-router.get('/UpdateUserConfidence', async(req,res) =>{
+router.post('/UpdateUserConfidence', validateToken, async(req,res) =>{
     try{
-        const { Sensibilidad, configID } = req.body;
+        const configID = req.body.Config
+        const Sensibilidad = req.body.sensibilidad;
+        console.log("Config: ",configID," Sensibilidad: ",Sensibilidad)
 
         const oracle = await getDBConnection();
         const result = await oracle.execute(
@@ -144,27 +174,6 @@ router.get('/UpdateUserConfidence', async(req,res) =>{
             { outFormat: oracledb.OBJECT }
         );
         res.status(201).json({ message: 'RESULT:', result });
-        console.log("Query res: ",result.rows)
-    } catch(err){
-        console.error('Error details:', err);
-        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
-    }
-});
-
-//Recoge las asignaciones (Secciones+salas)
-router.get('/getUserAsignation', validateToken, async(req,res) =>{
-    try{
-        const usuarioID = req.body.id;
-
-        console.log("user asignation, id: ",usuarioID)
-
-        const oracle = await getDBConnection();
-        const result = await oracle.execute(
-            'SELECT AG.IDASIGNACION, SC.IDSECCION AS ID_SECCION, SC.NOMBRE AS SECCION, SL.IDSALA AS ID_SALA ,SL.NOMBRE AS SALA FROM ASIGNACIONES AG JOIN USUARIOS US ON AG.USUARIOS_IDUSUARIO=US.IDUSUARIO JOIN SECCIONES SC ON AG.SALAS_SECCIONES_SECCIONES_IDSECCION=SC.IDSECCION JOIN SALAS SL ON AG.SALAS_SECCIONES_SALAS_IDSALA=SL.IDSALA WHERE AG.USUARIOS_IDUSUARIO=:idUsuario',
-            { idUsuario: usuarioID}, 
-            { outFormat: oracledb.OBJECT }
-        );
-        res.status(201).json({ data: result.rows });
         console.log("Query res: ",result.rows)
     } catch(err){
         console.error('Error details:', err);
@@ -192,12 +201,12 @@ router.post('/getCameraLink', async(req,res) =>{
 //Envia las metricas de la sesion
 router.post('/storeSessionMetrics', async(req,res) =>{
     try{
-        const { metrics } = req.body;  //Recibe los datos enviados desde flask.js
+        const { metrics, Asignacion } = req.body;  //Recibe los datos enviados desde flask.js
 
         const oracle = await getDBConnection();
         const result = await oracle.execute(
             'INSERT INTO METRICAS (IDMETRICA, REGISTRO, ASIGNACIONES_IDASIGNACION) VALUES (:idMetrica, :jsonData, :idAsignacion)',
-            { idMetrica: 0, jsonData: metrics, idAsignacion: 1}, //idMetrica = 0 para ser tomado por el trigger de oracle
+            { idMetrica: 0, jsonData: metrics, idAsignacion: Asignacion}, //idMetrica = 0 para ser tomado por el trigger de oracle
             { autoCommit: true }//Asegura el commit
         );
 
@@ -208,12 +217,14 @@ router.post('/storeSessionMetrics', async(req,res) =>{
 });
 
 //Recoger las metricas de una sesion por asignacion
-router.get('/getAsignationMetrics', async(req,res) =>{
+router.post('/getAsignationMetrics', async(req,res) =>{
     try{
+        const Asignacion = req.body.asignacion;
+
         const oracle = await getDBConnection();
         const result = await oracle.execute(
             'SELECT REGISTRO FROM METRICAS WHERE ASIGNACIONES_IDASIGNACION=:idAsignacion',
-            { idAsignacion: 1}, 
+            { idAsignacion: Asignacion}, 
             { outFormat: oracledb.OBJECT }
         );
 

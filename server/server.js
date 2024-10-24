@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
-
 const app = express();
 
 //Settings
@@ -13,6 +12,13 @@ app.use(cors());//Necesario para la conexion con el frontend
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));//Para parsear req.bodies en formato application/x-www-form-urlencoded
 app.use(cookieParser());//Parsear Cookies (Leer JWT)
+
+///ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR///
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "default-src 'self'; connect-src 'self' http://localhost:5000");
+    next();
+  });
+///ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR///
 
 //Routes
 app.use('/api',require('./routes/flask'));

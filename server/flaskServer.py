@@ -20,10 +20,10 @@ app = Flask(__name__)
 
 # Definir colores para cada estado de engagement (BGR)
 colorList = {
-    "Engaged": (94, 197, 34),  # Verde claro
-    "Frustrated": (68, 68, 239),   # Rojo
-    "Confused": (22, 115, 249),   # Naranjo
-    "Bored": (246, 130, 59)     # Celeste
+    "Engaged": (246, 130, 59),  #Celeste
+    "Frustrated": (68, 68, 239),   #Rojo
+    "Confused": (22, 115, 249),   #Naranjo
+    "Bored": (160, 112, 148)     #Lila/Morado
 }
 
 #Metricas
@@ -51,7 +51,7 @@ passCam = os.getenv('CAMERAPASS')
 camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
-processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
+processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
 fpsTarget = 24#Cantidad de fps que se quiere procesar
@@ -109,12 +109,10 @@ def receiveStream():
     
     while True:#Evita que el Thread finalice
         if not processVideo:#Dejar de recibir video si no se esta procesando
-            print("not process video")
             if cap:
                 cap.release()
                 q.empty()
                 q2.empty()
-                print("not process video si cap")
             continue
         
         ret, frame = cap.read()
@@ -133,7 +131,7 @@ def receiveStream():
         fpsStream = fps
 
         #FPS del stream
-        cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
+        #cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
 
         ##Redimensionar el frame si no cumple con la resolucion deseada
         if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
@@ -155,21 +153,6 @@ def procesStream():
                 frame=q.get()#Recibir los frames de "receiveStream"
                 print("PS get frame")
                 #region procesar frames en yolo
-                #Para no aumentar la carga de la cpu, solo procesar x frames por segundo
-                """ frameCount+=1
-
-                #Verifica si el buffer se esta llenando
-                if q.qsize() > 1:
-                    print("Skipping due to buffer")
-                    continue
-
-                if fpsStream == 0:#Evitar un error de frames (division x 0)
-                    print("El stream no tiene frames")
-                    continue
-
-                if frameCount % (fpsStream // fpsTarget) != 0:
-                    print("Frame count skip")
-                    continue """
                 frameCount = 0
                 
                 #Establecer metricas locales
@@ -220,7 +203,7 @@ def procesStream():
                                 predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
 
                                 #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
-                                if predictedProbabilities > minConfidence:
+                                if predictedProbabilities >= minConfidence:
                                     engagementState = daiseeLabels[predictedIndex]
                                 else:
                                     #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
@@ -349,15 +332,22 @@ def setConfidence():
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid confidence value"}), 400
 
-#Para evitar desincronizacion, terminar de procesar un video
+#Para evitar desincronizacion, Iniciar o terminar de procesar un video (y de paso, actualiza la sensibilidad)
 @app.route('/setVideoStream', methods=['POST'])
 def setProcessVideo():
-    global processVideo
+    global processVideo, minConfidence
     try:
         data = request.get_json()
         newState = bool(data.get('processVideo'))
+        newConfidence = float(data.get('minConfidence'))
 
         processVideo = newState
+        #Para evitar errores, asegurarse que el valor este en el rango
+        if 0 <= newConfidence <= 1:
+            minConfidence = newConfidence
+        else:
+            print("No se pudo actualizar la sensibilidad")
+
         return jsonify({"status": "success", "newState": processVideo}), 200
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid video state value"}), 400

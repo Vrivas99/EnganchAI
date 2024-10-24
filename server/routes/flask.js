@@ -12,11 +12,12 @@ const storeFrequency = 1;   //Cada cuantos segundos se almacenaran las metricas
 let lastStoredSecond = 0;//Ultimo segundo que se almaceno las metricas
 
 //Funciones sin API
-async function sessionMetricsDB(metric){
+async function sessionMetricsDB(metric, Asign){
     // Enviar las métricas a /db para almacenarlas en la base de datos
     try {
         await axios.post('http://localhost:5000/db/storeSessionMetrics', {
-            metrics: JSON.stringify(metric)//Asegurarse que esten en formato JSON
+            metrics: JSON.stringify(metric),//Asegurarse que esten en formato JSON
+            Asignacion: Asign
         });
         console.log('Metricas enviadas a la API');
     } catch (dbError) {
@@ -24,6 +25,9 @@ async function sessionMetricsDB(metric){
     }
 }
 
+//////////////
+//   GET    //
+//////////////
 //Rutas de API
 router.get('/flaskStream', async (req, res) => {
     try {
@@ -91,6 +95,9 @@ router.get('/getConfidence', async (req, res) => {
     }
 });
 
+//////////////
+//   POST   //
+//////////////
 //Modificar umbral de confianza
 router.post('/setConfidence', async (req, res) => {
     const { setConfidence } = req.body
@@ -112,20 +119,35 @@ router.post('/setConfidence', async (req, res) => {
 
 //Inicia/Finaliza la sesion (Activa/desactiva video para evitar desincronizacion)
 router.post('/setVideoStream', async (req, res) => {
-    const { newState } = req.body;
+    const { newState, Asignation } = req.body;
 
     console.log("set video stream: ",newState)
     try {
+        let newMinConfidence = 0.3;//Valor de minConfidence para actualizar al iniciar el servidor
+
+        //Solicitud a /db/getUserConfidence
+        /*if (newState == true){  
+            const userConfidenceResponse = await axios.get(`http://localhost:5000/db/getUserConfidence`);
+
+            // Verificar si la respuesta contiene los datos esperados
+            if (userConfidenceResponse.data && userConfidenceResponse.data.data.length > 0) {
+                newMinConfidence = userConfidenceResponse.data.data[0].SENSIBILIDAD;
+                console.log("Confianza del usuario obtenida: ", minConfidence);
+            } else {
+                console.log("No se encontró la configuración del usuario.");
+            }
+        }*/
+
         // Enviar el POST a Flask para cambiar el umbral de confianza
         const response = await axios.post(`http://${flaskIP}/setVideoStream`, {
-            processVideo: newState
+            processVideo: newState,
+            minConfidence: newMinConfidence
         });
 
         if (newState == false){
             console.log("Metricas de sesion finalizada: ")
-            sessionMetricsDB(sessionMetrics)//Enviar las metricas a /db
+            sessionMetricsDB(sessionMetrics,Asignation)//Enviar las metricas a /db
         }
-        
 
         // Devolver la respuesta a Express
         res.status(200).send(response.data);
