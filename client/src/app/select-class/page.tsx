@@ -19,10 +19,19 @@ export default function SelectClass() {
         SALA: string;
     }
 
+    //json de prueba
+/*     const data = [
+        { IDASIGNACION: 1, ID_SECCION: 1, SECCION: '001', ID_SALA: 1, SALA: 'Sala 1' },
+        { IDASIGNACION: 2, ID_SECCION: 2, SECCION: '002', ID_SALA: 2, SALA: 'Sala 2' },
+        { IDASIGNACION: 3, ID_SECCION: 3, SECCION: '003', ID_SALA: 3, SALA: 'Sala 3' },
+        { IDASIGNACION: 4, ID_SECCION: 4, SECCION: '004', ID_SALA: 4, SALA: 'Sala 4' },
+    ]; */
+
     const fetchUserAssignment = async () => {
         try {
             const response = await fetch('http://localhost:5000/db/getUserAsignation', {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -34,7 +43,7 @@ export default function SelectClass() {
             if (result?.data) {
                 setData(result.data);
             } else {
-                setData([]);
+                ([]);
             }
         } catch (error) {
             console.error('Error fetching user assignment:', error);
@@ -67,9 +76,7 @@ export default function SelectClass() {
                         onChange={(e) => setSelectedSection(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded"
                     >
-                        <option value="" disabled>
-                            Seleccione una Sección
-                        </option>
+                        <option value="" disabled>Seleccione una Sección</option>
                         {data.length > 0 ? (
                             data.map((asignacion) => (
                                 <option key={asignacion.ID_SECCION} value={asignacion.ID_SECCION}>
@@ -89,9 +96,7 @@ export default function SelectClass() {
                         className="w-full p-2 border border-gray-300 rounded"
                         disabled={!selectedSection}
                     >
-                        <option value="" disabled>
-                            Seleccione una Sala
-                        </option>
+                        <option value="" disabled>Seleccione una Sala</option>
                         {availableRooms.length > 0 ? (
                             availableRooms.map((room) => (
                                 <option key={room.ID_SALA} value={room.ID_SALA}>

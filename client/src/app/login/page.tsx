@@ -2,13 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
 import { toast } from 'react-toastify';
+import { useUser } from '@/context/UserContext';
 
 
 export default function Login() {
 
     const router = useRouter();
+    const { fetchDataUser  } = useUser();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -45,8 +46,10 @@ export default function Login() {
         try {
             const response = await fetch('http://localhost:5000/db/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
+
                 },
                 body: JSON.stringify({ email, password }),
             });
@@ -55,6 +58,7 @@ export default function Login() {
 
             if (response.status === 201) {
                 toast.success('Inicio de sesión exitoso');
+                await fetchDataUser();
                 router.push('/select-class');
             } else {
                 toast.error(data.error || 'Usuario y/o contraseña incorrectos front');

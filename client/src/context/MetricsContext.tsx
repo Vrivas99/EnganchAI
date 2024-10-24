@@ -55,9 +55,8 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
                 try {
                     const response = await fetch('http://localhost:5000/api/metrics',
                         {
-                            mode: 'cors', 
                             headers: {
-                                'Access-Control-Allow-Origin': '*',
+                                'Content-Type': 'application/json',
                             },
                         }
                     )
