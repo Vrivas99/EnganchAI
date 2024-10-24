@@ -53,14 +53,15 @@ export default function Login() {
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.status === 201) {
                 toast.success('Inicio de sesión exitoso');
                 router.push('/select-class');
             } else {
                 toast.error(data.error || 'Usuario y/o contraseña incorrectos front');
             }
         } catch (error) {
-            toast.error('Error en el servidor. Inténtelo más tarde.');
+            console.error('Error en el servidor:', error);
+            toast.error('Error en el servidor. Inténtelo más tarde. front');
         }
     };
 

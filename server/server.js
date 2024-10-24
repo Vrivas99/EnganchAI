@@ -8,7 +8,12 @@ const app = express();
 app.set('port', process.env.PORT || 5000)
 
 //Middlewares
-app.use(cors());//Necesario para la conexion con el frontend
+app.use(cors({
+  origin: 'http://localhost:3000', // O el dominio desde donde haces las peticiones
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  credentials: true, // Esto permite el envío de cookies
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));//Para parsear req.bodies en formato application/x-www-form-urlencoded
 app.use(cookieParser());//Parsear Cookies (Leer JWT)

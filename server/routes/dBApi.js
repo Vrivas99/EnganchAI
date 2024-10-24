@@ -20,7 +20,7 @@ function validateToken(req, res, next){
         next()
     }catch(err){
         res.clearCookie("jwt");
-        return res.status(403).json({ message: 'Acceso denegado, token expirado o incorrecto' });
+        return res.status(404).json({ message: 'Acceso denegado, token expirado o incorrecto' });
     }
 }
 
@@ -119,7 +119,8 @@ router.get('/getUserAsignation', validateToken, async(req,res) =>{
 //Realiza el login
 router.post('/login', async(req,res) =>{
     try{
-        const { correo, contrasenna } = req.body;
+        const correo = req.body.email; 
+        const contrasenna = req.body.password;
 
         const oracle = await getDBConnection();
         const result = await oracle.execute(
@@ -149,12 +150,13 @@ router.post('/login', async(req,res) =>{
         const cookieLogin = {
             expires: new Date(Date.now() + process.env.JWTCOOKIEEXPIRE * 24 * 60 * 60 * 1000),//Transformar el numero a dias
             path: "/",
-            httpOnly: true
+            httpOnly: false
         }
 
         //Enviar cookie al cliente
         res.cookie("jwt", token, cookieLogin);
-        return res.status(201).json({ data: result.rows });
+        console.log("Cookie: ", token, cookieLogin)
+        return res.status(201).json({ data: result.rows  });
     } catch(err){
         return res.status(400).json({ error: 'Usuario y/o contraseña invalidos', err: err.message });
     }
