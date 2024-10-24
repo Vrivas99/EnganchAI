@@ -1,4 +1,3 @@
-#Instalar paquetes con "pip install -r requirements.txt"
 from flask import Flask, Response, jsonify, request
 import cv2
 import numpy as np
@@ -16,14 +15,17 @@ q=queue.Queue(maxsize=1)#procesStream()
 q2=queue.Queue(maxsize=2)#displayStream()
 import threading
 
+#pip install flask opencv-python-headless tensorflow ultralytics python-dotenv [torch, solo si flask lo pide]
+#Necesita un modelo .h5 que pesa mas del limite de github, descargar para probar
+
 app = Flask(__name__)
 
 # Definir colores para cada estado de engagement (BGR)
 colorList = {
-    "Engaged": (246, 130, 59),  #Celeste
-    "Frustrated": (68, 68, 239),   #Rojo
-    "Confused": (22, 115, 249),   #Naranjo
-    "Bored": (160, 112, 148)     #Lila/Morado
+    "Engaged": (94, 197, 34),  # Verde claro
+    "Frustrated": (68, 68, 239),   # Rojo
+    "Confused": (22, 115, 249),   # Naranjo
+    "Bored": (246, 130, 59)     # Celeste
 }
 
 #Metricas
@@ -31,14 +33,17 @@ metrics = {} #Metricas locales, se modificaran aqui (flask); Se va definiendo en
 metricsAPI = {}#Metricas que se enviaran al frontend, copiara el contenido de "metrics" cuando se termine de procesar el frame
 
 #DAISEE
-daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
-minConfidence = 0.3#umbral minimo de confianza
+daiseeLabels = ["Sleepy","Bored", "Confused", "Engaged","Frustrated","Yawning"]
+minConfidence = 0.0#umbral minimo de confianza
 
 #Cargar modelos
 engagementModel = tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
 yoloModel = YOLO('yolov8n-face.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
 #device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible
 yoloModel = yoloModel.to('cpu')#device
+
+newYOLOV11 = YOLO('best_model.pt')
+newYOLOV11 = newYOLOV11.to('cpu')
 
 #Contador de ID's
 personIdCounter = 1
@@ -51,7 +56,7 @@ passCam = os.getenv('CAMERAPASS')
 camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
 cap = cv2.VideoCapture(camLink)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
-processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
+processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
 fpsTarget = 24#Cantidad de fps que se quiere procesar
@@ -109,10 +114,12 @@ def receiveStream():
     
     while True:#Evita que el Thread finalice
         if not processVideo:#Dejar de recibir video si no se esta procesando
+            print("not process video")
             if cap:
                 cap.release()
                 q.empty()
                 q2.empty()
+                print("not process video si cap")
             continue
         
         ret, frame = cap.read()
@@ -131,7 +138,7 @@ def receiveStream():
         fpsStream = fps
 
         #FPS del stream
-        #cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
+        cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
 
         ##Redimensionar el frame si no cumple con la resolucion deseada
         if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
@@ -157,7 +164,7 @@ def procesStream():
                 
                 #Establecer metricas locales
                 metrics["totalPeople"] = 0
-                metrics["stateCounts"] = {"Frustrated": 0, "Confused": 0, "Bored": 0, "Engaged": 0}
+                metrics["stateCounts"] = {"Sleepy":0,"Bored":0, "Confused":0, "Engaged":0,"Frustrated":0,"Yawning":0}
                 metrics["Ids"] = {}
                 
                 #Mover el frame a GPU/CPU
@@ -167,6 +174,8 @@ def procesStream():
                 tempData = []
                 # deteccion de objetos de YOLO
                 results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado, classes=0 para personas
+                
+                
                 metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
                 if results and len(results[0].boxes) > 0:
                     #personDetected = False #Resetear verificador de personas por frame
@@ -191,19 +200,47 @@ def procesStream():
                             face = frame[y1:y2, x1:x2]
                             if face.size == 0:#Si el tamaño de algun rostro detectado es 0, saltar al siguiente frame
                                 continue
-
+                            
                             faceResized = cv2.resize(face, (224, 224))
-                            faceArray = np.expand_dims(faceResized, axis=0) / 255.0
+
+                            newYOLOresults = newYOLOV11(faceResized)
+                            print("NEW YOLO RESULTS: ",newYOLOresults[0].boxes)
+                            boxes = newYOLOresults[0].boxes
+                            if boxes.cls[0] != None:
+                                predictedIndex = int(boxes.cls[0])
+                                predictedProbabilities = float(boxes.conf[0])#engagementPrediction[0][predictedIndex]#Extraer las probabilidades
+
+                                 #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
+                                if predictedProbabilities > minConfidence:
+                                    engagementState = daiseeLabels[predictedIndex]
+                                else:
+                                    print("####No cumplio el umbral####")
+                                    #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
+                                    continue
+
+                                #Pasar resultados de cada rostro
+                                tempData.append({
+                                    "trackID":trackID,
+                                    "x1": x1,
+                                    "y1": y1,
+                                    "x2": x2,
+                                    "y2": y2,
+                                    "engagementState": engagementState,
+                                    "predictedProbabilities": predictedProbabilities#,
+                                    #"otherLabels": otherLabels
+                                })
+
+                            #faceArray = np.expand_dims(faceResized, axis=0) / 255.0
 
                             #Prediccion de estado
-                            engagementPrediction = engagementModel.predict(faceArray)
+                            #engagementPrediction = engagementModel.predict(faceArray)
 
-                            if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
+                            """ if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
                                 predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
                                 predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
 
                                 #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
-                                if predictedProbabilities >= minConfidence:
+                                if predictedProbabilities > minConfidence:
                                     engagementState = daiseeLabels[predictedIndex]
                                 else:
                                     #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
@@ -230,7 +267,7 @@ def procesStream():
                                     "engagementState": engagementState,
                                     "predictedProbabilities": predictedProbabilities,
                                     "otherLabels": otherLabels
-                                })
+                                }) """
 
                 #Actualizar las metricas solo cuando se haya terminado de procesar el frame
                 metricsAPI = copy.deepcopy(metrics)
@@ -332,22 +369,15 @@ def setConfidence():
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid confidence value"}), 400
 
-#Para evitar desincronizacion, Iniciar o terminar de procesar un video (y de paso, actualiza la sensibilidad)
+#Para evitar desincronizacion, terminar de procesar un video
 @app.route('/setVideoStream', methods=['POST'])
 def setProcessVideo():
-    global processVideo, minConfidence
+    global processVideo
     try:
         data = request.get_json()
         newState = bool(data.get('processVideo'))
-        newConfidence = float(data.get('minConfidence'))
 
         processVideo = newState
-        #Para evitar errores, asegurarse que el valor este en el rango
-        if 0 <= newConfidence <= 1:
-            minConfidence = newConfidence
-        else:
-            print("No se pudo actualizar la sensibilidad")
-
         return jsonify({"status": "success", "newState": processVideo}), 200
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid video state value"}), 400
