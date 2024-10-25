@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRecording } from './RecordingContext';
 
 
-// Definición de la interfaz para el contexto de métricas
+//Definición de la interfaz para el contexto de métricas
 
 interface Metric {
     confidence: number;
@@ -12,7 +12,7 @@ interface Metric {
 }
 
 interface MetricsResponse {
-    Ids: Record<string, Metric>; // Un diccionario con las IDs y sus métricas
+    Ids: Record<string, Metric>; //Un diccionario con las IDs y sus métricas
     stateCounts: {
         Bored: number;
         Confused: number;
@@ -25,7 +25,7 @@ interface MetricsResponse {
 interface MetricsContextType {
     metrics: MetricsResponse;
     engagedHistory: { engagedCount: number }[];
-    isSessionEnded: boolean;  // Nuevo estado para determinar si la sesión ha finalizado
+    isSessionEnded: boolean;  //Nuevo estado para determinar si la sesión ha finalizado
     sessionReport: MetricsResponse | null;
 }
 

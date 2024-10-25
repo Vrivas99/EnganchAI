@@ -56,7 +56,7 @@ export default function Login() {
 
             const data = await response.json();
 
-            if (response.status === 201) {
+            if (response.ok) {
                 toast.success('Inicio de sesión exitoso');
                 await fetchDataUser();
                 router.push('/select-class');

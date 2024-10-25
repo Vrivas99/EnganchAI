@@ -21,12 +21,12 @@ const Aside = () => {
     const date = new Date();
     const currentDate = date.toLocaleDateString();
     const totalPeople = sessionReport?.totalPeople ?? 1;
-    const maxValue = Math.max(...engagedHistory.map((entry) => entry.engagedCount));
 
     const formatTime = (time: number) => {
+        const hours = Math.floor(time / 3600);
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
     //obtener el promedio total de la sesion
@@ -72,7 +72,7 @@ const Aside = () => {
                         </span>
                     </SheetDescription>
                 </SheetHeader>
-                <div className="mt-6 flex">
+                <div className="mt-4">
                     {/* se muestra el informe si termina la captura */}
                     {isSessionEnded && sessionReport ? (
                         <div className="flex justify-center flex-col w-full items-center gap-12">
