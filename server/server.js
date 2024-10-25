@@ -18,12 +18,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));//Para parsear req.bodies en formato application/x-www-form-urlencoded
 app.use(cookieParser());//Parsear Cookies (Leer JWT)
 
-///ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR///
+//Manejar CORS
 app.use((req, res, next) => {
-    res.setHeader("Content-Security-Policy", "default-src 'self'; connect-src 'self' http://localhost:5000");
-    next();
+  res.header('Content-Type', 'application/json;charset=UTF-8')
+  res.header('Access-Control-Allow-Credentials', true)
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  )
+  next()
   });
-///ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR//////ELIMINAR///
 
 //Routes
 app.use('/api',require('./routes/flask'));

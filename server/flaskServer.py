@@ -7,8 +7,8 @@ from ultralytics import YOLO
 import copy#Para copiar las metricas
 from collections import defaultdict#Para almacenar las id's
 #Cargar usuario y contraseña de la camara
-from dotenv import load_dotenv
-import os
+#from dotenv import load_dotenv
+#import os
 #Crear multiprocesos para no saturar las funciones
 import queue
 #Crear queue para pasar los frames entre multiprocesos
@@ -37,7 +37,7 @@ minConfidence = 0.3#umbral minimo de confianza
 #Cargar modelos
 engagementModel = tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
 yoloModel = YOLO('yolov8n-face.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
-#device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible
+#device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible (SOLO CUDA)
 yoloModel = yoloModel.to('cpu')#device
 
 #Contador de ID's
@@ -45,12 +45,7 @@ personIdCounter = 1
 activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
 #Datos de la camara
-load_dotenv()
-userCam = os.getenv('CAMERAUSER')
-passCam = os.getenv('CAMERAPASS')
-camLink = "TestVideos/4.mp4"#f"rtsp://{userCam}:{passCam}@192.168.100.84:554/av_stream/ch0"
-cap = cv2.VideoCapture(camLink)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
+camLink = "TestVideos/4.mp4"
 processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
@@ -66,14 +61,8 @@ resHeight = 1080
 dataStream = []
 proNextFrame = True#Intenta poner al dia a procesStream
 
-if not cap.isOpened():
-    raise Exception("Error: Could not open video stream.")
-else:
-    #print("CUDA:", torch.cuda.is_available())
-    #if torch.cuda.is_available():
-    #    print("Número de GPUs:", torch.cuda.device_count())
-    #    print("Nombre de la GPU:", torch.cuda.get_device_name(0))
-    print("\n///////\nstream in http://127.0.0.1:5001/videoFeed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
+#Cuando salga este print, el servidor flask habra iniciado por completo
+print("\n///////\nstream in http://127.0.0.1:5001/videoFeed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
 
 #Limpiar el contador de ID cuando no se detecten mas personas en un frame
 def resetIDCounter():

@@ -7,7 +7,7 @@ const jsonwebtoken = require('jsonwebtoken')
 
 //Middleware de usuario
 function validateToken(req, res, next){
-    const accessToken = req.cookies.jwt
+    const accessToken = req.cookies["jwt"]
     if (!accessToken) return res.status(403).json({ message: 'Acceso denegado' });
     
     try{
@@ -142,20 +142,26 @@ router.post('/login', async(req,res) =>{
         );
 
         //Crear token
-        const token = jsonwebtoken.sign({user:correo, Id:resultUser.rows[0]["IDUSUARIO"], Name: resultUser.rows[0]["NOMBRE"], Avatar: resultUser.rows[0]["AVATAR"], Config: resultUser.rows[0]["CONFIG_IDCONFIGURACION"]},
-            process.env.JWTSECRET, 
-            {expiresIn:process.env.JWTEXPIRATION})
+
+        const tokenPayload = {
+            user:correo, Id:resultUser.rows[0]["IDUSUARIO"], 
+            Name: resultUser.rows[0]["NOMBRE"], 
+            Avatar: resultUser.rows[0]["AVATAR"], 
+            Config: resultUser.rows[0]["CONFIG_IDCONFIGURACION"]
+        }
+        // {expiresIn:process.env.JWTEXPIRATION}
+        const token = jsonwebtoken.sign(tokenPayload, process.env.JWTSECRET)
         
         //Crear cookie del login
         const cookieLogin = {
             expires: new Date(Date.now() + process.env.JWTCOOKIEEXPIRE * 24 * 60 * 60 * 1000),//Transformar el numero a dias
             path: "/",
-            httpOnly: false
+            httpOnly: true
         }
 
         //Enviar cookie al cliente
-        res.cookie("jwt", token, cookieLogin);
-        console.log("Cookie: ", token, cookieLogin)
+        res.cookie("jwt", token, cookieLogin);//cookieLogin
+        console.log("Cookie D: ", token, cookieLogin)
         return res.status(201).json({ data: result.rows  });
     } catch(err){
         return res.status(400).json({ error: 'Usuario y/o contraseña invalidos', err: err.message });
