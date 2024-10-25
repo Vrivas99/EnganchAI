@@ -61,7 +61,7 @@ const Aside = () => {
                 <SheetHeader>
                     <SheetTitle>
                         <span className="text-gray-900 py-2 font-bold flex w-full justify-center">
-                            {isSessionEnded ? 'Informe de ultima sesión' : 'Métricas en vivo'}
+                            {isSessionEnded ? <div className="flex flex-col items-center"><h1>Informe de ultima sesión</h1><p>{currentDate}</p></div> : 'Métricas en vivo'}
                         </span>
                     </SheetTitle>
                     <SheetDescription>
@@ -77,7 +77,6 @@ const Aside = () => {
                     {isSessionEnded && sessionReport ? (
                         <div className="flex justify-center flex-col w-full items-center gap-12">
                             {/* informe */}
-                            <p className=" font-semibold">{currentDate}</p>
                             <p>Total de estudiantes: {sessionReport?.totalPeople || 0}</p>
                             <p>Tiempo de sesión: {formatTime(sessionTime)}</p>
                             <div className="w-full flex flex-col justify-center items-center">
