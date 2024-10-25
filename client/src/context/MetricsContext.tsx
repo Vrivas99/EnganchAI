@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRecording } from './RecordingContext';
 
+
 // Definición de la interfaz para el contexto de métricas
 
 interface Metric {
@@ -23,6 +24,7 @@ interface MetricsResponse {
 
 interface MetricsContextType {
     metrics: MetricsResponse;
+    engagedHistory: { engagedCount: number }[];
     isSessionEnded: boolean;  // Nuevo estado para determinar si la sesión ha finalizado
     sessionReport: MetricsResponse | null;
 }
@@ -42,47 +44,48 @@ export const useMetrics = () => {
 // Provider del contexto que maneja el estado de métricas
 export const MetricsProvider = ({ children }: { children: ReactNode }) => {
     const [metrics, setMetrics] = useState<MetricsResponse | any>(null);
+    const [engagedHistory, setEngagedHistory] = useState<{ engagedCount: number }[]>([]);
     const [isSessionEnded, setIsSessionEnded] = useState(false);
     const [sessionReport, setSessionReport] = useState<MetricsResponse | null>(null);
     const { isRecording } = useRecording(); // Usar isRecording desde el RecordingContext
-
+    
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
-
+    
         if (isRecording) {
-            // Hace la solicitud a la API de métricas solo cuando se esté grabando
             const fetchMetrics = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/api/metrics',
-                        {
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                        }
-                    )
+                    const response = await fetch('http://localhost:5000/api/metrics', {
+                        headers: { 'Content-Type': 'application/json' },
+                    });
                     const data = await response.json();
-
-                    // Verificar si data tiene la estructura esperada
+                    
                     if (data && data.Ids && data.stateCounts && data.totalPeople) {
                         setMetrics(data);
-                    } else {
-                        console.error('Estructura de datos inválida:', data);
+                        // Guardar datos de engaged a lo largo del tiempo
+                        setEngagedHistory((prev) => [
+                            ...prev, 
+                            { engagedCount: data.stateCounts.Bored }
+                        ]);
                     }
                 } catch (error) {
                     console.error('Error al obtener las métricas:', error);
                 }
             };
-            interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1
+            interval = setInterval(fetchMetrics, 1000); // Actualiza cada segundo
         } else if (!isRecording && metrics) {
-            setSessionReport(metrics);
+            setSessionReport(metrics); // Se establece el reporte final al detener la grabación
             setIsSessionEnded(true);
+            
         }
-
+    
         return () => clearInterval(interval!);
-    }, [isRecording]); // Dependencia de isRecording
+    }, [isRecording]);
+    
+    
 
     return (
-        <MetricsContext.Provider value={{ metrics, isSessionEnded, sessionReport }}>
+        <MetricsContext.Provider value={{ metrics,engagedHistory, isSessionEnded, sessionReport }}>
             {children}
         </MetricsContext.Provider>
     );
