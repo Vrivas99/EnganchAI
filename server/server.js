@@ -5,7 +5,8 @@ require('dotenv').config();
 const app = express();
 
 //Settings
-app.set('port', process.env.PORT || 5000)
+app.set('port', process.env.PORT || 5000);
+app.locals.port = app.get('port');//Para poder utilizarlo en las rutas
 
 //Middlewares
 app.use(cors({
@@ -22,12 +23,9 @@ app.use(cookieParser());//Parsear Cookies (Leer JWT)
 app.use((req, res, next) => {
   res.header('Content-Type', 'application/json;charset=UTF-8')
   res.header('Access-Control-Allow-Credentials', true)
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  )
+  res.header( 'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept', 'Authorization')
   next()
-  });
+});
 
 //Routes
 app.use('/api',require('./routes/flask'));

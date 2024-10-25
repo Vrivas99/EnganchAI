@@ -1,7 +1,9 @@
-const { Router } = require('express');
+const { Router, application } = require('express');
 const router = Router();
 const axios = require('axios');
 
+const cookieParser = require('cookie-parser');
+router.use(cookieParser());
 let flaskIP = '127.0.0.1:5001';
 
 //Almacenar metricas en la BD
@@ -10,6 +12,7 @@ let sessionMetrics = [];//Metricas totales de la sesion
 let currentSecond = 0;//Segundo actual de la sesion
 const storeFrequency = 1;   //Cada cuantos segundos se almacenaran las metricas
 let lastStoredSecond = 0;//Ultimo segundo que se almaceno las metricas
+
 
 //Funciones sin API
 async function sessionMetricsDB(metric, Asign){
@@ -98,7 +101,7 @@ router.get('/getConfidence', async (req, res) => {
 //////////////
 //   POST   //
 //////////////
-//Modificar umbral de confianza
+//Modificar umbral de confianza (flask-Oracle)
 router.post('/setConfidence', async (req, res) => {
     const { setConfidence } = req.body
     const newConfidence = setConfidence/100//Transformar la confianza de entero (react) a decimal (flask)
@@ -109,8 +112,21 @@ router.post('/setConfidence', async (req, res) => {
             minConfidence: newConfidence
         });
 
+        //El token no se va reenviando directamente, asi que lo almaceno como un header
+        const config = {
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${req.cookies["jwt"]}`
+            }
+        } 
+        //Post a la BDD Oracle
+        const bdResponse = await axios.post(`http://localhost:5000/db/UpdateUserConfidence`, {
+            sensibilidad: Math.round(newConfidence*100)//En la base de datos, la sensibilidad es un numero entero
+        }, config);
+
+
         // Devolver la respuesta a Express
-        res.status(200).send(response.data);
+        res.status(200).send({ flaskResponse: response.data, bdResponse: bdResponse.data});
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Error cambiando la confianza' });
@@ -146,7 +162,7 @@ router.post('/setVideoStream', async (req, res) => {
 
         if (newState == false){
             console.log("Metricas de sesion finalizada: ")
-            sessionMetricsDB(sessionMetrics,Asignation)//Enviar las metricas a /db
+            //sessionMetricsDB(sessionMetrics,Asignation)//Enviar las metricas a /db
         }
 
         // Devolver la respuesta a Express

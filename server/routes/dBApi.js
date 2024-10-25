@@ -7,8 +7,8 @@ const jsonwebtoken = require('jsonwebtoken')
 
 //Middleware de usuario
 function validateToken(req, res, next){
-    const accessToken = req.cookies["jwt"]
-    if (!accessToken) return res.status(403).json({ message: 'Acceso denegado' });
+    const accessToken = req.cookies["jwt"] || req.headers.authorization?.split(" ")[1];;
+    if (!accessToken) return res.status(401).json({ message: 'Acceso denegado' });
     
     try{
         const userToken = jsonwebtoken.verify(accessToken, process.env.JWTSECRET)
@@ -20,9 +20,9 @@ function validateToken(req, res, next){
         next()
     }catch(err){
         res.clearCookie("jwt");
-        return res.status(404).json({ message: 'Acceso denegado, token expirado o incorrecto' });
+        return res.status(403).json({ message: 'Acceso denegado, token expirado o incorrecto' });
     }
-}
+};
 
 //////////////
 //GET (Los datos no se envian desde el frontend o no requiere datos)
@@ -75,7 +75,7 @@ router.get('/getUserData', validateToken, async(req,res) =>{
 //Recoger configuraciones del usuario
 router.get('/getUserConfidence', validateToken, async(req,res) =>{
     try{
-        const correo = req.body.correo;
+        const correo = req.body.correo;//Obtenido desde el token
 
         const oracle = await getDBConnection();
         const result = await oracle.execute(
@@ -171,15 +171,15 @@ router.post('/login', async(req,res) =>{
 //Actualizar configuraciones del usuario
 router.post('/UpdateUserConfidence', validateToken, async(req,res) =>{
     try{
-        const configID = req.body.Config
-        const Sensibilidad = req.body.sensibilidad;
+        const configID = req.body.Config;//Enviado por validateToken
+        const Sensibilidad = req.body.sensibilidad;//Enviado por /api/setConfidence
         console.log("Config: ",configID," Sensibilidad: ",Sensibilidad)
 
         const oracle = await getDBConnection();
         const result = await oracle.execute(
             'UPDATE CONFIGURACIONES SET SENSIBILIDAD =:nueSensibilidad WHERE IDCONFIGURACION=:idConfig',
             { nueSensibilidad: Sensibilidad, idConfig: configID}, 
-            { outFormat: oracledb.OBJECT }
+            { autoCommit: true, outFormat: oracledb.OBJECT },//Asegura el commit
         );
         res.status(201).json({ message: 'RESULT:', result });
         console.log("Query res: ",result.rows)
