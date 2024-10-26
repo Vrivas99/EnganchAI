@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function middleware(req: NextRequest) {
 
     const token = req.cookies.get('jwt')?.value; // Obtenemos el token de la cookie
-    console.log(token);
     try {
         
         const response = await fetch('http://localhost:5000/db/validateToken', {
@@ -17,13 +16,9 @@ export async function middleware(req: NextRequest) {
             },
         });
 
-        console.log(response.status);
         if (response.ok) {
-            console.log('Token válido');
             return NextResponse.next();
         } else {
-            console.log(response.status);
-            console.log('Token inválido');
             return NextResponse.redirect(new URL('/', req.url));
         }
     } catch (error) {
@@ -32,7 +27,7 @@ export async function middleware(req: NextRequest) {
     }
 }
 
-// Configuración para aplicar el middleware solo a la ruta /video
+// Configuración del middleware para las rutas que queremos proteger
 export const config = {
     matcher: [
         '/video/:path*',

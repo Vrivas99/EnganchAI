@@ -82,7 +82,7 @@ const Aside = () => {
                             <div className="w-full flex flex-col justify-center items-center">
                                 <p>Promedio de Engagment</p>
                                 <div className=" w-full bg-gray-200 rounded-full h-5 dark:bg-gray-700">
-                                    <div className=" bg-blue-400 flex text-center h-5 rounded-full dark:bg-blue-500" style={{ width: `${promedioFinal}%` }}>
+                                    <div className=" bg-blue-400 flex text-center h-5 rounded-full dark:bg-blue-500 items-center" style={{ width: `${promedioFinal}%` }}>
                                         <span className="font-bold text-gray-1 w-full">{promedioFinal}%</span>
                                     </div>
                                 </div>

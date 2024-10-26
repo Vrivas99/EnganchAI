@@ -43,7 +43,6 @@ const Navbar = () => {
             setTimeout(() => setToastShown(false), 3000);
         }
     }, [metrics, toastShown]);
-
     // Temporizador para la grabación
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
@@ -58,7 +57,6 @@ const Navbar = () => {
 
         return () => clearInterval(interval!);
     }, [isRecording]);
-
     //Realiza un POST hacia el server de express para cambiar el estado del stream
     const setVideoStream = async () => {
         try {
