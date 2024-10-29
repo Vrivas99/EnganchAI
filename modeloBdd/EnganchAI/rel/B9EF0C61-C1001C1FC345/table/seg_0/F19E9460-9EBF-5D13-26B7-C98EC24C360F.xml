@@ -13,8 +13,22 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>E62E4A59-AA15-A9BC-876F-2AA23DFEBBEE</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Nombre" id="7CD646FC-7893-782F-C161-F313F450FA07">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:45:06 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
 <Column name="Correo" id="3B014934-802C-BC9A-3A39-6016EBDB7319">
@@ -22,18 +36,51 @@
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>58E3BAB2-BA03-CA5C-2294-E12887A878C4</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>40</dataTypeSize>
+<ownDataTypeParameters>40,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="Contraseña" id="3B82A6F2-21F2-9A0B-9A5A-AB5FE5CB89C0">
+<Column name="Contrasenna" id="3B82A6F2-21F2-9A0B-9A5A-AB5FE5CB89C0">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-02 16:15:31 UTC</createdTime>
 <generatorID>F806B5DC-E9A7-EBAD-55DF-A889BC222889</generatorID>
 <ownerDesignName>EnganchAI</ownerDesignName>
-<use>0</use>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>64</dataTypeSize>
+<ownDataTypeParameters>64,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name=" Avatar" id="80D4B5B2-1658-44B6-AB5F-29C1282D6706">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 16:32:11 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>150</dataTypeSize>
+<ownDataTypeParameters>150,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="CONFIG_idConfiguracion" id="E6973369-18FE-CB17-E996-FA69F780D9A5">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 16:37:57 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="72372258-80A7-DBEE-AF3D-FB1022B2FB7E" referredColumn="B2316A68-5B59-F58D-D9D1-41230D06E98F"/>
+</associations>
 </Column>
 </columns>
 <indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
@@ -47,6 +94,26 @@
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
 <colUsage columnID="9F989616-B845-CF93-5398-0B23F2B3DAC8"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="B39E9C9A-A29F-A928-5B82-0BADAD02E65F" name="USUARIOS__IDX">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-11 14:34:56 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="E6973369-18FE-CB17-E996-FA69F780D9A5"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="4938A58D-0A17-1F4A-75B9-832B95A106AB" name="USUARIOS_CONFIGURACIONES_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 16:37:57 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="E6973369-18FE-CB17-E996-FA69F780D9A5"/>
 </indexColumnUsage>
 </ind_PK_UK>
 </indexes>

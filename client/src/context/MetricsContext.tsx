@@ -1,10 +1,10 @@
-// MetricsContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRecording } from './RecordingContext'; // Importa el RecordingContext para utilizar isRecording
+import { useRecording } from './RecordingContext';
 
-// Define la interfaz para el contexto de métricas
+
+//Definición de la interfaz para el contexto de métricas
 
 interface Metric {
     confidence: number;
@@ -12,7 +12,7 @@ interface Metric {
 }
 
 interface MetricsResponse {
-    Ids: Record<string, Metric>; // Un diccionario con las IDs y sus métricas
+    Ids: Record<string, Metric>; //Un diccionario con las IDs y sus métricas
     stateCounts: {
         Bored: number;
         Confused: number;
@@ -24,12 +24,15 @@ interface MetricsResponse {
 
 interface MetricsContextType {
     metrics: MetricsResponse;
+    engagedHistory: { engagedCount: number }[];
+    isSessionEnded: boolean;  //Nuevo estado para determinar si la sesión ha finalizado
+    sessionReport: MetricsResponse | null;
 }
 
-// Crea el contexto de métricas
+// Creación del contexto de métricas
 const MetricsContext = createContext<MetricsContextType | undefined>(undefined);
 
-// Hook personalizado para usar el contexto de métricas
+// Hook para usar el contexto de métricas
 export const useMetrics = () => {
     const context = useContext(MetricsContext);
     if (!context) {
@@ -38,38 +41,51 @@ export const useMetrics = () => {
     return context;
 };
 
-// Proveedor del contexto que maneja el estado de métricas
+// Provider del contexto que maneja el estado de métricas
 export const MetricsProvider = ({ children }: { children: ReactNode }) => {
-    const [metrics, setMetrics] = useState<any>(null);
+    const [metrics, setMetrics] = useState<MetricsResponse | any>(null);
+    const [engagedHistory, setEngagedHistory] = useState<{ engagedCount: number }[]>([]);
+    const [isSessionEnded, setIsSessionEnded] = useState(false);
+    const [sessionReport, setSessionReport] = useState<MetricsResponse | null>(null);
     const { isRecording } = useRecording(); // Usar isRecording desde el RecordingContext
-
+    
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
-
+    
         if (isRecording) {
-            // Hacer la solicitud a la API de métricas solo cuando se esté grabando
             const fetchMetrics = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/metrics');
+                    const response = await fetch('http://localhost:5000/api/metrics', {
+                        headers: { 'Content-Type': 'application/json' },
+                    });
                     const data = await response.json();
-                    setMetrics(data);
+                    
+                    if (data && data.Ids && data.stateCounts && data.totalPeople) {
+                        setMetrics(data);
+                        // Guardar datos de engaged a lo largo del tiempo
+                        setEngagedHistory((prev) => [
+                            ...prev, 
+                            { engagedCount: data.stateCounts.Bored }
+                        ]);
+                    }
                 } catch (error) {
                     console.error('Error al obtener las métricas:', error);
                 }
             };
-
-            fetchMetrics();
-            interval = setInterval(fetchMetrics, 1000); // Actualiza cada 1
-        } else {
-            setMetrics(null); // Resetea las métricas cuando no se está grabando
-            clearInterval(interval!);
+            interval = setInterval(fetchMetrics, 1000); // Actualiza cada segundo
+        } else if (!isRecording && metrics) {
+            setSessionReport(metrics); // Se establece el reporte final al detener la grabación
+            setIsSessionEnded(true);
+            
         }
-
+    
         return () => clearInterval(interval!);
-    }, [isRecording]); // Dependencia de isRecording
+    }, [isRecording]);
+    
+    
 
     return (
-        <MetricsContext.Provider value={{ metrics }}>
+        <MetricsContext.Provider value={{ metrics,engagedHistory, isSessionEnded, sessionReport }}>
             {children}
         </MetricsContext.Provider>
     );

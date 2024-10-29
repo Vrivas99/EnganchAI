@@ -2,17 +2,19 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-// Define la interfaz para el contexto
+//interfaz para el contexto
 interface RecordingContextType {
   isRecording: boolean;
   setIsRecording: (isRecording: boolean) => void;
   handleRecording: () => void;
+  sessionTime: number;
+  setSessionTime: (time: number) => void;
 }
 
-// Crea el contexto con valores iniciales
+// Creacion del contexto con valores iniciales
 const RecordingContext = createContext<RecordingContextType | undefined>(undefined);
 
-// Hook personalizado para usar el contexto
+// Hook para usar el contexto
 export const useRecording = () => {
   const context = useContext(RecordingContext);
   if (!context) {
@@ -21,16 +23,17 @@ export const useRecording = () => {
   return context;
 };
 
-// Proveedor del contexto que maneja el estado de grabación
+// Provider del contexto que maneja el estado de grabación
 export const RecordingProvider = ({ children }: { children: ReactNode }) => {
   const [isRecording, setIsRecording] = useState(false);
+  const [sessionTime, setSessionTime] = useState(0);
 
   const handleRecording = () => {
     setIsRecording((prevState) => !prevState);
   };
 
   return (
-    <RecordingContext.Provider value={{ isRecording,setIsRecording, handleRecording }}>
+    <RecordingContext.Provider value={{ isRecording, setIsRecording, handleRecording, sessionTime, setSessionTime }}>
       {children}
     </RecordingContext.Provider>
   );

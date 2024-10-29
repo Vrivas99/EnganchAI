@@ -24,13 +24,20 @@ const AiConfig: React.FC<AiConfigProps> = () => {
     //Actualizar la barra de confianza
     const getConfidence = async () =>{
         try {
-            const response = await fetch('http://localhost:5000/getConfidence');
+            console.log("Get Confidence")
+            const response = await fetch('http://localhost:5000/db/getUserConfidence', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
             if (!response.ok) {
                 throw new Error('Error fetching confidence');
             }
             const data = await response.json();
-            console.log('Fetched data:', data); // Verifica los datos recibidos
-            setSensitivity(data);//Los datos desde 
+            console.log('Fetched data:', data["data"][0]["SENSIBILIDAD"]); // Verifica los datos recibidos
+            setSensitivity(data["data"][0]["SENSIBILIDAD"]);//Los datos desde 
         } catch (error) {
             console.error('Error fetching confidence:', error);
         }
@@ -39,8 +46,9 @@ const AiConfig: React.FC<AiConfigProps> = () => {
     //Actualizar la confianza en flask
     const setConfidence = async () => {
         try {
-            const response = await fetch('http://localhost:5000/setConfidence', {
+            const response = await fetch('http://localhost:5000/api/setConfidence', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -75,9 +83,9 @@ const AiConfig: React.FC<AiConfigProps> = () => {
             return;
         }
 
-        // Si todo está correcto, cerrar el diálogo de login y abrir el de configuración
+        //cerrar el diálogo de login y abrir el de configuración
         toast.success('Inicio de sesión exitoso');
-        getConfidence();//Recoge la confianza actual de flask para que actualice la barra
+        getConfidence();//Recoge la confianza actual desde la BDD para que actualice la barra
         setIsConfigVisible(true);
     };
 
@@ -86,7 +94,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
     const handleSaveConfig = () => {
         toast.success(`Configuración guardada: Sensibilidad = ${sensitivity}`);
         setIsConfigVisible(false); // Cierra el diálogo de configuración
-        setConfidence()//Envia la nueva confianza a flask
+        setConfidence()//Envia la nueva confianza a flask y a la BDD
     };
 
     return (
@@ -115,6 +123,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                                 type="text"
                                 id='user'
                                 placeholder="Usuario"
+                                autoComplete='off'
                                 value={user}
                                 onChange={(e) => setUser(e.target.value)}
                                 className="w-full p-2 border border-gray-300 rounded"
@@ -122,6 +131,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                             <input
                                 type="password"
                                 id='password'
+                                autoComplete='off'
                                 placeholder="Contraseña"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}

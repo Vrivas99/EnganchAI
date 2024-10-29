@@ -1,0 +1,103 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="4930C055-1990-99D3-3EEB-9D5C4B8938EB" name="ASIGNACIONES">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:54:16 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<ordsAlias>table_7</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="idAsignacion" id="D2DF91E9-B347-7269-82A6-7459FA2F60C7">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:55:07 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="USUARIOS_IdUsuario" id="EDF8ED6B-0632-9956-8F3A-0887587E0883">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:54:53 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="888F7AA1-FCA5-CDF9-6B42-F3D63EA0B68B" referredColumn="9F989616-B845-CF93-5398-0B23F2B3DAC8"/>
+</associations>
+</Column>
+<Column name="SALAS_SECCIONES_SECCIONES_IdSeccion" id="63E72D34-73D7-8CFD-CAC6-2DF342321786">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-11 14:42:51 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="B6BF407C-2FB1-E853-42C7-B609B11EBAFE" referredColumn="E20D615B-F4FF-5BE0-6AAE-723BB205046A"/>
+</associations>
+</Column>
+<Column name="SALAS_SECCIONES_SALAS_IdSala" id="016251F5-3822-FD7C-2D80-7847EAF04FDB">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-11 14:42:51 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="B6BF407C-2FB1-E853-42C7-B609B11EBAFE" referredColumn="B43D688F-5305-DD09-9C9B-9D2694C27FBB"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="42385D87-D6A9-BB02-F257-454E4728C30A" name="ASIGNACIONES_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:55:07 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D2DF91E9-B347-7269-82A6-7459FA2F60C7"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="9EE84C06-F820-9F36-9552-3AA8E2611C4C" name="ASIGNACIONES_USUARIOS_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-07 12:54:53 UTC</createdTime>
+<generatorID>F0AA97DD-2D9D-C37B-4803-503D5038FFEA</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="EDF8ED6B-0632-9956-8F3A-0887587E0883"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="14B89D3D-190D-5989-7B97-2E33B3EA2390" name="ASIGNACIONES_SALAS_SECCIONES_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-11 14:42:51 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="016251F5-3822-FD7C-2D80-7847EAF04FDB"/>
+<colUsage columnID="63E72D34-73D7-8CFD-CAC6-2DF342321786"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
