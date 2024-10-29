@@ -29,13 +29,9 @@ function validateToken(req, res, next){
     }
 };
 
-//////////////
-//GET (Los datos no se envian desde el frontend o no requiere datos)
-//////////////
-//get y validacion de JWT para frontend
 //Recoger JWT
 router.get('/getToken', validateToken, (req, res) => {
-    res.status(200).json({
+    return res.status(200).json({
         correo: req.body.correo,
         id: req.body.id,
         name: req.body.Name,
@@ -46,7 +42,7 @@ router.get('/getToken', validateToken, (req, res) => {
 
 //Validar existencia de token
 router.get('/validateToken', validateToken, (req, res) => {
-    res.status(200).json({ message: 'Token Ok' });
+    return res.status(200).json({ message: 'Token Ok' });
 });
 
 //Clear Token (para pruebas o cerrar sesion)
@@ -182,6 +178,7 @@ router.post('/login', async(req,res) =>{
         console.log("Cookie D: ", token, cookieLogin)
         return res.status(201).json({ data: result.rows  });
     } catch(err){
+        console.error('Error details:', err);
         return res.status(400).json({ error: 'Usuario y/o contraseña invalidos', err: err.message });
     }
 });

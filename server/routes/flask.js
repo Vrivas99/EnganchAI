@@ -175,14 +175,15 @@ router.post('/setVideoStream', async (req, res) => {
 
 //Cambiar el link de la camara
 router.post('/setCamLink', async (req, res) => {
-    const { camValue } = req.body.link;
+    const  link  = req.body.link;
 
-    if (camValue) {
+    if (link) {
         try {
             // Realiza la solicitud POST al servidor Flask
             const response = await axios.post(`http://${flaskIP}/setCamLink`, {
-                camLink: camValue
+                camLink: link
             });
+            console.log("Link de camara cambiado: ",link)
             return res.status(200).send(response.data);
         } catch (error) {
             console.error('Error al enviar la solicitud al servidor Flask:', error);

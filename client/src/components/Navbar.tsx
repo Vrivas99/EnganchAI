@@ -1,10 +1,16 @@
 'use client';
-
+// Imports de Next.js
 import Link from 'next/link';
+import React from 'react';
 import { useEffect, useState } from 'react';
-import { useRecording } from '@/context/RecordingContext'; // Importa el hook desde el contexto
+import { usePathname } from 'next/navigation';
+
+// Imports de context
+import { useRecording } from '@/context/RecordingContext';
 import { useMetrics } from '@/context/MetricsContext';
-import { usePathname } from 'next/navigation'; // Hook para obtener la ruta actual
+import { useUser } from '@/context/UserContext';
+
+// Imports de componentes
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -14,25 +20,30 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 const Navbar = () => {
+
+    // Constantes de contexto
     const { isRecording, handleRecording, setSessionTime } = useRecording(); // Usa el estado global
+    const {user, logout} = useUser();
+    const { metrics } = useMetrics();
+
+    // Estados locales
     const [timer, setTimer] = useState(0);
     const [toastShown, setToastShown] = useState(false);
     const pathname = usePathname(); // Obtener la ruta actual
-    const { metrics } = useMetrics();
 
-
+    // Muestra un toast si hay más de 10 estudiantes frustrados
     useEffect(() => {
-        if (metrics?.stateCounts?.Frustrated > 10 && !toastShown) {
+        if (metrics?.stateCounts?.Frustrated > 10 && !toastShown && isRecording) {
             toast.warning('¡Hay 10 o más estudiantes frustrados!');
             setToastShown(true);
 
             setTimeout(() => setToastShown(false), 3000);
         }
     }, [metrics, toastShown]);
-
+    // Temporizador para la grabación
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
 
@@ -46,7 +57,6 @@ const Navbar = () => {
 
         return () => clearInterval(interval!);
     }, [isRecording]);
-
     //Realiza un POST hacia el server de express para cambiar el estado del stream
     const setVideoStream = async () => {
         try {
@@ -66,7 +76,7 @@ const Navbar = () => {
             console.error('Error al enviar el estado (Catch): ', error);
         }
     };
-
+    // Inicia o finaliza la grabación
     const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
@@ -76,17 +86,11 @@ const Navbar = () => {
         handleRecording(); // Cambia el estado de grabación
         setVideoStream()//Establece video en flask
     };
-
+    // Formatea el tiempo en minutos y segundos
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    };
-
-    const handleLogout = () => {
-        if (isRecording) {
-            handleRecording(); // Detiene la grabación si está activa
-        }
     };
 
     return (
@@ -102,11 +106,11 @@ const Navbar = () => {
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
                     <span className="block">Bored: {metrics?.stateCounts?.Bored || 0}</span>
-                    <div className="w-full h-1 bg-blue-500 mt-1"></div>
+                    <div className="w-full h-1 bg-purple-500 mt-1"></div>
                 </div>
                 <div className="bg-white text-black shadow-md p-2 rounded w-32">
                     <span className="block">Engaged: {metrics?.stateCounts?.Engaged || 0}</span>
-                    <div className="w-full h-1 bg-green-500 mt-1"></div>
+                    <div className="w-full h-1 bg-blue-500 mt-1"></div>
                 </div>
             </div>
 
@@ -127,15 +131,22 @@ const Navbar = () => {
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Avatar>
-                                <AvatarImage src="https://picsum.photos/200/300" />
-                                <AvatarFallback className="bg-black">PR</AvatarFallback>
+                                {user?.avatar ? (
+                                    <AvatarImage src={user.avatar} />
+                                ) : (
+                                    <AvatarFallback className="bg-black">
+                                        {user?.name ? user.name[0] : 'U'}
+                                    </AvatarFallback>
+                                )}
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                            <DropdownMenuLabel>
+                                {user?.name || 'User Undefined'}
+                            </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Link href="/" onClick={handleLogout} className="text-neutral-900">
+                                <Link href="/" onClick={logout} className="text-neutral-900">
                                     Cerrar Sesión
                                 </Link>
                             </DropdownMenuItem>
