@@ -298,7 +298,7 @@ def setCamLink():
     try:
         data = request.get_json()
         camLink = data.get('camLink')
-
+        print(f"Link de cámara recibido: {camLink}")
         return jsonify({"status": "success", "newLink": camLink}), 200
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid value"}), 400

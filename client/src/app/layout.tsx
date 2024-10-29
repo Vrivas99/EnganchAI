@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { RecordingProvider } from "@/context/RecordingContext";
 import { MetricsProvider } from "@/context/MetricsContext";
 import { UserProvider } from "@/context/UserContext";
+import { ClassProvider } from "@/context/ClassContext";
 
 
 
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <UserProvider>
         <RecordingProvider>
+        <ClassProvider>
           <MetricsProvider>
             <Navbar />
             <main className="relative flex-1 flex overflow-hidden">
@@ -56,6 +58,7 @@ export default function RootLayout({
             />
 
           </MetricsProvider>
+          </ClassProvider>
         </RecordingProvider>
         </UserProvider>
       </body>

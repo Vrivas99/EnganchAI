@@ -77,7 +77,7 @@ const Aside = () => {
                     {isSessionEnded && sessionReport ? (
                         <div className="flex justify-center flex-col w-full items-center gap-12">
                             {/* informe */}
-                            <p>Total de estudiantes: {sessionReport?.totalPeople || 0}</p>
+                            <p>Total de estudiantes: {Math.max(sessionReport?.totalPeople) || 0}</p>
                             <p>Tiempo de sesión: {formatTime(sessionTime)}</p>
                             <div className="w-full flex flex-col justify-center items-center">
                                 <p>Promedio de Engagment</p>
