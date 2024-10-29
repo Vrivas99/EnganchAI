@@ -12,12 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "nodemon": "^3.1.7",
     "jsonwebtoken": "^9.0.2",
-    "oracledb": "^6.6.0"
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.7",
+    "oci-common": "^2.97.0",
+    "oci-sdk": "^2.97.0",
+    "oracledb": "^6.6.0",
+    "sharp": "^0.33.5"
   }
 }

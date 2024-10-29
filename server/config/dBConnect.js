@@ -1,6 +1,3 @@
-//const { Router } = require('express');
-//const router = Router();
-
 const oracledb = require('oracledb')
 const path = require('path');
 let connection;

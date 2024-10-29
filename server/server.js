@@ -3,6 +3,8 @@ const cors = require("cors");
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const app = express();
+const bodyParser = require('body-parser');
+const multer = require('multer')
 
 //Settings
 app.set('port', process.env.PORT || 5000);
@@ -18,6 +20,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));//Para parsear req.bodies en formato application/x-www-form-urlencoded
 app.use(cookieParser());//Parsear Cookies (Leer JWT)
+//Parsear
+app.use(bodyParser.urlencoded({extended: true}));//application/xwww- / form-urlencoded
+app.use(express.static('public'));//multipart/form-data
 
 //Manejar CORS
 app.use((req, res, next) => {

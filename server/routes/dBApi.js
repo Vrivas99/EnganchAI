@@ -1,13 +1,18 @@
 const { Router } = require('express');
 const router = Router();
-const { getDBConnection } = require('./dBConnect')
+const { getDBConnection } = require('../config/dBConnect')
 const oracledb = require('oracledb'); //Para utilizar outFormat
-// bcryptjs 
-const jsonwebtoken = require('jsonwebtoken')
+const {encrypt, compare} = require('../helpers/handleBcrypt')//Encriptar contraseñas
+const jsonwebtoken = require('jsonwebtoken')//Token JWT(cookie)
+const sharp = require('sharp')//Redimensionar los Pfp
+const { uploadAvatar } = require('../config/ociInit')
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); // Carpeta temporal para almacenar imágenes subidas
+
 
 //Middleware de usuario
 function validateToken(req, res, next){
-    const accessToken = req.cookies["jwt"] || req.headers.authorization?.split(" ")[1];;
+    const accessToken = req.cookies["jwt"] || req.headers.authorization?.split(" ")[1];
     if (!accessToken) return res.status(401).json({ message: 'Acceso denegado' });
     
     try{
@@ -38,7 +43,6 @@ router.get('/getToken', validateToken, (req, res) => {
         config: req.body.Config
     });
 });
-
 
 //Validar existencia de token
 router.get('/validateToken', validateToken, (req, res) => {
@@ -121,20 +125,35 @@ router.post('/login', async(req,res) =>{
     try{
         const correo = req.body.email; 
         const contrasenna = req.body.password;
+        //const checkContra = await encrypt(contrasenna);//Encriptar la contraseña para compararla con la BD
 
         const oracle = await getDBConnection();
+        
+        //Se tiene que recuperar la contraseña del usuario debido a bcrypt (se tiene que comprobar localmente)
         const result = await oracle.execute(
-            'SELECT COUNT(*) FROM USUARIOS WHERE CORREO=:correo AND CONTRASENNA=:contrasenna',
-            { correo: correo, contrasenna: contrasenna}, 
+            'SELECT CONTRASENNA FROM USUARIOS WHERE CORREO=:correo',
+            { correo: correo}, 
             { outFormat: oracledb.OBJECT }
         );
-
-        //Login no exitoso
-        if (result.rows[0]["COUNT(*)"] != 1){
+        
+        //Login no exitoso (no se encontro al usuario)
+        if (result.rows.length === 0){
+            console.log("not user")
             return res.status(400).json({ error: 'Usuario y/o contraseña invalidos' });
         }
 
-        //Guardar informacion del usuario dentro del token (Eliminar si se usara /getUserData)
+        // Obtener el hash de la contraseña almacenada
+        const hashContra = result.rows[0].CONTRASENNA;
+        console.log("hash contra ",hashContra)
+        // Usar bcrypt para comparar la contraseña ingresada con el hash
+        const match = await compare(contrasenna, hashContra);
+
+        if (!match) {
+            console.log("not match")
+            return res.status(400).json({ error: 'Usuario y/o contraseña invalidos' });
+        }
+
+        //Si coincide la contraseña, loguear y guardar informacion del usuario dentro del token (Eliminar si se usara /getUserData)
         const resultUser = await oracle.execute(
             'SELECT IDUSUARIO, NOMBRE, AVATAR, CONFIG_IDCONFIGURACION FROM USUARIOS WHERE CORREO=:correo',
             { correo: correo}, 
@@ -142,7 +161,6 @@ router.post('/login', async(req,res) =>{
         );
 
         //Crear token
-
         const tokenPayload = {
             user:correo, Id:resultUser.rows[0]["IDUSUARIO"], 
             Name: resultUser.rows[0]["NOMBRE"], 
@@ -165,6 +183,44 @@ router.post('/login', async(req,res) =>{
         return res.status(201).json({ data: result.rows  });
     } catch(err){
         return res.status(400).json({ error: 'Usuario y/o contraseña invalidos', err: err.message });
+    }
+});
+
+
+//Registrar un usuario (De momento, utilizar postman)
+router.post('/register', upload.single('avatar'), async(req,res) =>{
+    try{
+        const {nombre, correo, contrasenna} = req.body;
+        const avatar = req.file.path;
+
+        const oracle = await getDBConnection();
+
+        //Confirmar que el usuario (correo) no exista antes de registrarlo
+        const resCount = await oracle.execute(
+            'SELECT COUNT(*) FROM USUARIOS WHERE CORREO=:correo',
+            { correo: correo}, 
+            { outFormat: oracledb.OBJECT }
+        );
+
+        //Usuario ya existente
+        if (result.rows[0]["COUNT(*)"] != 0){
+            return res.status(400).json({ error: 'Usuario ya existente' });
+        }
+
+        //Si el usuario(correo) no existia, iniciar proceso:
+        //Encriptar contraseña
+        const passwordHash  = await encrypt(contrasenna);
+        //Insertar Avatar en el bucket y retornar el link
+        const avatarLink = await uploadAvatar(avatar,`pfp${correo}.png`);
+
+        const result = await oracle.execute(
+            'INSERT INTO USUARIOS (IDUSUARIO, NOMBRE, CORREO, CONTRASENNA, CONFIG_IDCONFIGURACION) VALUES (0,:nombre,:correo,:contrasenna,:avatar,0)',
+            { nombre: nombre, correo: correo, contrasenna: passwordHash, avatar: avatarLink}, 
+            { outFormat: oracledb.OBJECT }
+        );
+        res.status(200).json({ res: "Usuario registrado con exito" });
+    } catch(err){
+        return res.status(400).json({ error: 'Error al registrarse', err: err.message });
     }
 });
 
