@@ -141,18 +141,26 @@ router.post('/setVideoStream', async (req, res) => {
     try {
         let newMinConfidence = 0.3;//Valor de minConfidence para actualizar al iniciar el servidor
 
-        //Solicitud a /db/getUserConfidence
-        /*if (newState == true){  
-            const userConfidenceResponse = await axios.get(`http://localhost:5000/db/getUserConfidence`);
+        //Solicitud a /db/getUserConfidence para actualizar flask con minConfidence al iniciar transmision
+        if (newState == true){  
+            //Es necesario pasarle las cookies al middleware
+            const config = {
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${req.cookies["jwt"]}`
+                }
+            } 
+            console.log("JWT: ",req.cookies["jwt"])
+            const userConfidenceResponse = await axios.get(`http://localhost:5000/db/getUserConfidence`,config);
 
             // Verificar si la respuesta contiene los datos esperados
             if (userConfidenceResponse.data && userConfidenceResponse.data.data.length > 0) {
-                newMinConfidence = userConfidenceResponse.data.data[0].SENSIBILIDAD;
-                console.log("Confianza del usuario obtenida: ", minConfidence);
+                newMinConfidence = (userConfidenceResponse.data.data[0].SENSIBILIDAD/100);//FLASK maneja los datos en rangos de 0-1
+                console.log("Confianza del usuario obtenida: ", newMinConfidence);
             } else {
                 console.log("No se encontró la configuración del usuario.");
             }
-        }*/
+        }
 
         // Enviar el POST a Flask para cambiar el umbral de confianza
         const response = await axios.post(`http://${flaskIP}/setVideoStream`, {
