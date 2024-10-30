@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { IoSettingsSharp } from "react-icons/io5";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
     Dialog,
@@ -104,9 +104,9 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                 <Dialog>
                     <DialogTrigger>
                         <span
-                            className='absolute z-10 text-2xl right-20 bottom-5 bg-white rounded-full p-3 text-gray-900'
-                            aria-label='Abrir Métricas'
-                            title='Abrir Métricas'
+                            className='absolute z-10 text-2xl right-20 bottom-5 bg-white rounded-full p-3 text-gray-900 hover:bg-slate-900 hover:text-white'
+                            aria-label='Abrir Ajustes'
+                            title='Abrir Ajustes'
                         >
                             <IoSettingsSharp />
                         </span>
@@ -124,7 +124,6 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                                 id='user'
                                 placeholder="Usuario"
                                 autoComplete='off'
-                                value={user}
                                 onChange={(e) => setUser(e.target.value)}
                                 className="w-full p-2 border border-gray-300 rounded"
                             />
@@ -133,7 +132,6 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                                 id='password'
                                 autoComplete='off'
                                 placeholder="Contraseña"
-                                value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full p-2 border border-gray-300 rounded"
                             />
@@ -159,7 +157,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="mb-4">
-                            <label htmlFor="sensitivity" className="block mb-2">Sensibilidad: {sensitivity}</label>
+                            <label htmlFor="sensitivity" className="block mb-2 font-medium">Sensibilidad: {sensitivity}%</label>
                             <input
                                 type="range"
                                 id="sensitivity"
@@ -172,7 +170,7 @@ const AiConfig: React.FC<AiConfigProps> = () => {
                         </div>
                         <button
                             onClick={handleSaveConfig}
-                            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transform transition duration-300 hover:scale-105"
                         >
                             Guardar Configuración
                         </button>

@@ -17,7 +17,7 @@ import {
 
 const Aside = () => {
     const { metrics, isSessionEnded, sessionReport, engagedHistory } = useMetrics();
-    const { sessionTime } = useRecording();
+    const { sessionTime, isRecording } = useRecording();
     const date = new Date();
     const currentDate = date.toLocaleDateString();
     const totalPeople = sessionReport?.totalPeople ?? 1;
@@ -50,7 +50,7 @@ const Aside = () => {
         <Sheet>
             <SheetTrigger>
                 <span
-                    className='absolute z-10 text-2xl right-5 bottom-5 bg-white rounded-full p-3 text-gray-900'
+                    className='absolute z-10 text-2xl right-5 bottom-5 bg-white rounded-full p-3 text-gray-900 hover:bg-slate-900 hover:text-white'
                     aria-label='Abrir Metricas'
                     title='Abrir Metricas'
                 >
@@ -61,12 +61,12 @@ const Aside = () => {
                 <SheetHeader>
                     <SheetTitle>
                         <span className="text-gray-900 py-2 font-bold flex w-full justify-center">
-                            {isSessionEnded ? <div className="flex flex-col items-center"><h1>Informe de ultima sesión</h1><p>{currentDate}</p></div> : 'Métricas en vivo'}
+                            {!isRecording && isSessionEnded ? <div className="flex flex-col items-center"><h1>Informe de ultima sesión</h1><p>{currentDate}</p></div> : 'Métricas en vivo'}
                         </span>
                     </SheetTitle>
                     <SheetDescription>
                         <span className="text-gray-700 flex w-full justify-center">
-                            {isSessionEnded
+                            {!isRecording && isSessionEnded
                                 ? 'Este es el resumen de la sesión de captura.'
                                 : 'Estas metricas muestra que tan confiable es la detencción del engagment sobre los estudiantes'}
                         </span>
@@ -74,7 +74,7 @@ const Aside = () => {
                 </SheetHeader>
                 <div className="mt-4">
                     {/* se muestra el informe si termina la captura */}
-                    {isSessionEnded && sessionReport ? (
+                    {!isRecording && isSessionEnded && sessionReport ? (
                         <div className="flex justify-center flex-col w-full items-center gap-12">
                             {/* informe */}
                             <p>Total de estudiantes: {Math.max(sessionReport?.totalPeople) || 0}</p>

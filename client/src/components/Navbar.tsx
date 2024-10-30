@@ -80,11 +80,14 @@ const Navbar = () => {
     const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
+            setVideoStream();//Establece video en flask
         }else {
             setSessionTime(timer);
+            
         }
+        
         handleRecording(); // Cambia el estado de grabación
-        setVideoStream()//Establece video en flask
+        
     };
     // Formatea el tiempo en minutos y segundos
     const formatTime = (time: number) => {
@@ -94,7 +97,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
+        <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center shadow-xl">
             <div className="flex space-x-4 md:text-sm xl:text-base">
                 <div className="bg-white text-black shadow-md p-2 rounded sm:w-20 md:w-32">
                     <span className="block">Frustrated: {metrics?.stateCounts?.Frustrated || 0}</span>
@@ -146,7 +149,12 @@ const Navbar = () => {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Link href="/" onClick={logout} className="text-neutral-900">
+                                <Link href="#" className="text-neutral-900">
+                                    Historial de Sesiones
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Link href="/" onClick={logout} className="text-red-600">
                                     Cerrar Sesión
                                 </Link>
                             </DropdownMenuItem>
