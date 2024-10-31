@@ -1,0 +1,16 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="B6BF407C-2FB1-E853-42C7-B609B11EBAFE" containerWithKeyObject="4930C055-1990-99D3-3EEB-9D5C4B8938EB" localFKIndex="14B89D3D-190D-5989-7B97-2E33B3EA2390" name="ASIGNACIONES_SALAS_SECCIONES_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-11 14:42:51 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<referredTableLongName>SALAS_SECCIONES</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>0D20BAE5-3C19-CE27-66DA-8C3C83934E32</referredTableID>
+<keyObject>0C8D382F-A769-1FCA-668C-1CCF1631B48A</keyObject>
+<referredKeyID>0C8D382F-A769-1FCA-668C-1CCF1631B48A</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>SALAS_IdSala,SECCIONES_IdSeccion</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>
