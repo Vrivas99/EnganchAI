@@ -332,9 +332,6 @@ def setProcessVideo():
         newConfidence = float(data.get('minConfidence'))
 
         processVideo = newState
-        print("//////////////////////")
-        print("SENSI: ",newConfidence)
-        print("//////////////////////\n")
         #Para evitar errores, asegurarse que el valor este en el rango
         if 0 <= newConfidence <= 1:
             minConfidence = newConfidence
