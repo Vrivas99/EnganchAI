@@ -9,6 +9,7 @@ boredom_model_path = 'Boredom.keras'
 confusion_model_path = 'Confusion.keras'
 frustration_model_path = 'Frustration.keras'
 
+# Cargar los modelos
 engagement_model = load_model(engagement_model_path)
 boredom_model = load_model(boredom_model_path)
 confusion_model = load_model(confusion_model_path)
@@ -62,12 +63,26 @@ engagement_pred, boredom_pred, confusion_pred, frustration_pred = predictions
 
 # Combinar predicciones en un diccionario para mayor claridad
 predictions = {
-    'Engagement': engagement_pred[0].argmax(),  # Por ejemplo, si es softmax, esto devuelve la clase
-    'Boredom': boredom_pred[0].argmax(),
-    'Confusion': confusion_pred[0].argmax(),
-    'Frustration': frustration_pred[0].argmax()
+    'Engagement': {
+                    'predicted_class': engagement_pred[0].argmax(),  # Por ejemplo, si es softmax, esto devuelve la clase
+                    'confidence': engagement_pred[0][engagement_pred[0].argmax()]
+                  } ,
+    'Boredom':    { 
+                    'predicted_class': boredom_pred[0].argmax(),
+                    'confidence': boredom_pred[0][boredom_pred[0].argmax()]
+                  } ,
+    'Confusion':  {
+                    'predicted_class': confusion_pred[0].argmax(),
+                    'confidence': confusion_pred[0][confusion_pred[0].argmax()]
+                  } ,
+    'Frustration': {
+                    'predicted_class' : frustration_pred[0].argmax(),
+                    'confidence': frustration_pred[0][frustration_pred[0].argmax()]
+                   }
 }
 
+# Mostrar los resultados
 print(f"Predicciones para el frame:")
 for emotion, pred in predictions.items():
-    print(f"{emotion}: {pred}")
+     print(f"{emotion}: Predicción: {pred['predicted_class']}, Confianza: {pred['confidence']:.4f}")
+
