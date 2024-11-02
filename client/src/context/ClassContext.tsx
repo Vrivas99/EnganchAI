@@ -20,6 +20,8 @@ interface ClassContextType {
     fetchUserAssignment: () => Promise<void>;
     cameraLink: string;
     fetchCameraLink: () => Promise<void>;
+    getSelectedSectionName: () => string;
+    getSelectedClassName: () => string;
 }
 
 const ClassContext = createContext<ClassContextType | undefined>(undefined);
@@ -40,6 +42,16 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [availableRooms, setAvailableRooms] = useState<Asignacion[]>([]);
     const [cameraLink, setCameraLink] = useState<string>('');
     const { isRecording } = useRecording();
+
+    const getSelectedSectionName = () => {
+        const section = availableSections.find((sec) => sec.ID_SECCION === Number(selectedSection));
+        return section ? section.SECCION : '';
+    };
+    
+    const getSelectedClassName = () => {
+        const room = availableRooms.find((room) => room.ID_SALA === Number(selectedClass));
+        return room ? room.SALA : '';
+    };
 
     const fetchUserAssignment = async () => {
         try {
@@ -79,7 +91,6 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 throw new Error('No camera link found');
             }else if (isRecording) {
                 setCameraLink(link);
-                console.log('Camera link:', link);
             } 
             // Realizar el siguiente post para configurar el link en el backend
             await fetch('http://localhost:5000/api/setCamLink', {
@@ -114,6 +125,8 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 fetchUserAssignment,
                 cameraLink,
                 fetchCameraLink,
+                getSelectedSectionName,
+                getSelectedClassName,
             }}
         >
             {children}

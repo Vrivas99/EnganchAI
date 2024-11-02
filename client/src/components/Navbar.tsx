@@ -57,6 +57,7 @@ const Navbar = () => {
 
         return () => clearInterval(interval!);
     }, [isRecording]);
+
     //Realiza un POST hacia el server de express para cambiar el estado del stream
     const setVideoStream = async () => {
         try {
