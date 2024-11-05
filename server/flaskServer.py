@@ -3,6 +3,7 @@ from flask import Flask, Response, jsonify, request
 import cv2
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.client import device_lib#Importar Usos de CUDA
 from ultralytics import YOLO
 import copy#Para copiar las metricas
 from collections import defaultdict#Para almacenar las id's
@@ -35,7 +36,24 @@ daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
 minConfidence = 0.3#umbral minimo de confianza
 
 #Cargar modelos
-engagementModel = tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
+#Verificar la existencia de una GPU para usar cuda
+def isCudaAvailable():
+    localDeviceProtos = device_lib.list_local_devices()
+    return any(device.device_type == 'GPU' for device in localDeviceProtos)
+
+#Cargar modelo de Engagement
+engagementModelName = "modelo_cnn_knn.h5"
+engagementModel = None#tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
+if isCudaAvailable():
+    print("CUDA disponible, cargado modelo en GPU")
+    with tf.device('/GPU:0'):
+        engagementModel = tf.keras.models.load_model(engagementModelName)
+        #engagementModel = tf.saved_model.load(engagementModelName)
+else:
+    print("CUDA no esta disponible, cargado modelo en CPU")
+    engagementModel = tf.keras.models.load_model(engagementModelName)
+
+#Cargar mmodelo de Yolo
 yoloModel = YOLO('yolov8n-face.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
 #device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible (SOLO CUDA)
 yoloModel = yoloModel.to('cpu')#device
@@ -63,7 +81,10 @@ dataStream = []
 proNextFrame = True#Intenta poner al dia a procesStream
 
 #Cuando salga este print, el servidor flask habra iniciado por completo
+print("Tf version=",tf.__version__)
+print("Num GPUs Available=", len(tf.config.list_physical_devices('GPU')))
 print("\n///////\nstream in http://127.0.0.1:5001/videoFeed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
+
 
 #Limpiar el contador de ID cuando no se detecten mas personas en un frame
 def resetIDCounter():
@@ -186,7 +207,11 @@ def procesStream():
                             faceArray = np.expand_dims(faceResized, axis=0) / 255.0
 
                             #Prediccion de estado
-                            engagementPrediction = engagementModel.predict(faceArray)
+                            if isCudaAvailable():
+                                with tf.device('/GPU:0'):
+                                    engagementPrediction = engagementModel.predict(faceArray)
+                            else:
+                                engagementPrediction = engagementModel.predict(faceArray)
 
                             if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
                                 predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
