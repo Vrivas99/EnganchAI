@@ -25,6 +25,7 @@ interface MetricsResponse {
 interface MetricsContextType {
     metrics: MetricsResponse;
     engagedHistory: { engagedCount: number }[];
+    clearEngagedHistory: () => void;
     isSessionEnded: boolean;  //Nuevo estado para determinar si la sesión ha finalizado
     sessionReport: MetricsResponse | null;
 }
@@ -81,11 +82,15 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
     
         return () => clearInterval(interval!);
     }, [isRecording]);
+
+    const clearEngagedHistory = () => {
+        setEngagedHistory([]);
+    };
     
     
 
     return (
-        <MetricsContext.Provider value={{ metrics,engagedHistory, isSessionEnded, sessionReport }}>
+        <MetricsContext.Provider value={{ metrics,engagedHistory, clearEngagedHistory, isSessionEnded, sessionReport }}>
             {children}
         </MetricsContext.Provider>
     );
