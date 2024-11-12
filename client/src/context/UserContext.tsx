@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useMetrics } from './MetricsContext';
 
 interface User {
     user: string;
@@ -30,6 +31,7 @@ export const useUser = () => {
 // Proveedor del contexto que maneja la lógica de obtener el usuario
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const { clearEngagedHistory } = useMetrics();
 
     // Fetch datos de usuario
     const fetchDataUser = async () => {
@@ -62,7 +64,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     'Content-Type': 'application/json',
                 },
             });
-            setUser(null);  // Limpiar el estado del usuario al hacer logout
+            setUser(null);// Limpiar el estado del usuario al hacer logout
+            clearEngagedHistory();// Limpiar el historial de engagement
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
         }

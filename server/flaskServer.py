@@ -3,6 +3,7 @@ from flask import Flask, Response, jsonify, request
 import cv2
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.client import device_lib#Importar Usos de CUDA
 from ultralytics import YOLO
 import copy#Para copiar las metricas
 from collections import defaultdict#Para almacenar las id's
@@ -35,7 +36,24 @@ daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
 minConfidence = 0.3#umbral minimo de confianza
 
 #Cargar modelos
-engagementModel = tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
+#Verificar la existencia de una GPU para usar cuda
+def isCudaAvailable():
+    localDeviceProtos = device_lib.list_local_devices()
+    return any(device.device_type == 'GPU' for device in localDeviceProtos)
+
+#Cargar modelo de Engagement
+engagementModelName = "modelo_cnn_knn.h5"
+engagementModel = None#tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
+if isCudaAvailable():
+    print("CUDA disponible, cargado modelo en GPU")
+    with tf.device('/GPU:0'):
+        engagementModel = tf.keras.models.load_model(engagementModelName)
+        #engagementModel = tf.saved_model.load(engagementModelName)
+else:
+    print("CUDA no esta disponible, cargado modelo en CPU")
+    engagementModel = tf.keras.models.load_model(engagementModelName)
+
+#Cargar mmodelo de Yolo
 yoloModel = YOLO('yolov8n-face.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
 #device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible (SOLO CUDA)
 yoloModel = yoloModel.to('cpu')#device
@@ -45,7 +63,8 @@ personIdCounter = 1
 activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
 #Datos de la camara
-camLink = "TestVideos/4.mp4"
+camLink = "TestVideos/7.mp4"
+cap = None
 processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
@@ -62,13 +81,29 @@ dataStream = []
 proNextFrame = True#Intenta poner al dia a procesStream
 
 #Cuando salga este print, el servidor flask habra iniciado por completo
+print("Tf version=",tf.__version__)
+print("Num GPUs Available=", len(tf.config.list_physical_devices('GPU')))
 print("\n///////\nstream in http://127.0.0.1:5001/videoFeed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
+
 
 #Limpiar el contador de ID cuando no se detecten mas personas en un frame
 def resetIDCounter():
     global personIdCounter, activePersonIds
     personIdCounter = 1
     activePersonIds = {}
+
+#Inicia/reinicia una transmision de opencv2
+def initCV2(Release = False):
+    global cap
+    #Reinicir una transmision
+    if Release:
+        cap.release()
+
+    cap = cv2.VideoCapture(camLink)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
+    #Intenta cambiar la resolucion desde la fuente de video (algunos dispositivos pueden no permitir un cambio en la resolucion)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, resWidth)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resHeight)
 
 #Dibujar texto y un fondo en la imagen (para ID y engagement)
 def drawCv2Text(img, text, pos=(0,0), font=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, colorRect=(0,0,0),colorText=(255,255,255), fontThick=1):
@@ -81,20 +116,7 @@ def drawCv2Text(img, text, pos=(0,0), font=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0
 
 #Recibir transmision desde la camara y enviarla a displayFrames
 def receiveStream():
-    global frameCount, fpsStream, proNextFrame
-    cap = cv2.VideoCapture(camLink)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
-    #Intenta cambiar la resolucion desde la fuente de video (algunos dispositivos pueden no permitir un cambio en la resolucion)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, resWidth)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resHeight)
-    ret, frame = cap.read()
-    #Si el dispositivo no admite el cambio de resolucion con set (ej: rtsp), cambiar la resolucion manualmente
-    if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
-        frame = cv2.resize(frame, (resWidth, resHeight))#Tamaño de entrada (debe coincidir con la redimension dentro del while)
-    if proNextFrame and not q.full():
-        q.put_nowait(frame)
-        proNextFrame = False
-    q2.put(frame)
+    global frameCount, fpsStream, proNextFrame, cap
     
     while True:#Evita que el Thread finalice
         if not processVideo:#Dejar de recibir video si no se esta procesando
@@ -104,15 +126,15 @@ def receiveStream():
                 q2.empty()
             continue
         
+        #Antes de iniciar cualquier transmision, cap es None
+        if cap == None:
+            initCV2()
+        
         ret, frame = cap.read()
         if not ret:
             print("receiveStream() not RET")
             #Intentar una reconexion
-            cap.release()
-            cap = cv2.VideoCapture(camLink)
-            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  #Cantidad de fotogramas que se almacenaran en el buffer
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, resWidth)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resHeight)
+            initCV2(True)
             continue
 
         #Poner los fps del stream en la imagen a enviar
@@ -185,7 +207,11 @@ def procesStream():
                             faceArray = np.expand_dims(faceResized, axis=0) / 255.0
 
                             #Prediccion de estado
-                            engagementPrediction = engagementModel.predict(faceArray)
+                            if isCudaAvailable():
+                                with tf.device('/GPU:0'):
+                                    engagementPrediction = engagementModel.predict(faceArray)
+                            else:
+                                engagementPrediction = engagementModel.predict(faceArray)
 
                             if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
                                 predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
@@ -334,8 +360,13 @@ def setProcessVideo():
         #Para evitar errores, asegurarse que el valor este en el rango
         if 0 <= newConfidence <= 1:
             minConfidence = newConfidence
+            print("NEW confidence: ",minConfidence)
         else:
             print("No se pudo actualizar la sensibilidad")
+        
+        if processVideo == True:
+            #Al iniciar una transmision, inicio cv2 (asi tambien se reinicia camLink)
+            initCV2()
 
         return jsonify({"status": "success", "newState": processVideo}), 200
     except (ValueError, TypeError):

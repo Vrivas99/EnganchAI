@@ -1,11 +1,12 @@
 'use client';
-import { FaPlus } from "react-icons/fa";
-import { IoWarningOutline } from "react-icons/io5";
+
+// Imports de context
 import { useMetrics } from "@/context/MetricsContext";
 import { useRecording } from "@/context/RecordingContext";
+import { useClass } from "@/context/ClassContext";
 
+// Imports de componentes
 import LineGraph from "./Line";
-
 import {
     Sheet,
     SheetContent,
@@ -14,13 +15,18 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import { FaPlus } from "react-icons/fa";
+import { IoWarningOutline } from "react-icons/io5";
 
 const Aside = () => {
     const { metrics, isSessionEnded, sessionReport, engagedHistory } = useMetrics();
-    const { sessionTime } = useRecording();
+    const { sessionTime, isRecording } = useRecording();
+    const { getSelectedClassName, getSelectedSectionName } = useClass();
+
     const date = new Date();
     const currentDate = date.toLocaleDateString();
     const totalPeople = sessionReport?.totalPeople ?? 1;
+
 
     const formatTime = (time: number) => {
         const hours = Math.floor(time / 3600);
@@ -50,7 +56,7 @@ const Aside = () => {
         <Sheet>
             <SheetTrigger>
                 <span
-                    className='absolute z-10 text-2xl right-5 bottom-5 bg-white rounded-full p-3 text-gray-900'
+                    className='absolute z-10 text-2xl right-5 bottom-5 bg-white rounded-full p-3 text-gray-900 hover:bg-slate-900 hover:text-white'
                     aria-label='Abrir Metricas'
                     title='Abrir Metricas'
                 >
@@ -61,12 +67,12 @@ const Aside = () => {
                 <SheetHeader>
                     <SheetTitle>
                         <span className="text-gray-900 py-2 font-bold flex w-full justify-center">
-                            {isSessionEnded ? <div className="flex flex-col items-center"><h1>Informe de ultima sesión</h1><p>{currentDate}</p></div> : 'Métricas en vivo'}
+                            {!isRecording && isSessionEnded ? <div className="flex flex-col items-center"><h1>Informe de ultima sesión</h1><p>{currentDate}</p></div> : 'Métricas en vivo'}
                         </span>
                     </SheetTitle>
                     <SheetDescription>
                         <span className="text-gray-700 flex w-full justify-center">
-                            {isSessionEnded
+                            {!isRecording && isSessionEnded
                                 ? 'Este es el resumen de la sesión de captura.'
                                 : 'Estas metricas muestra que tan confiable es la detencción del engagment sobre los estudiantes'}
                         </span>
@@ -74,20 +80,28 @@ const Aside = () => {
                 </SheetHeader>
                 <div className="mt-4">
                     {/* se muestra el informe si termina la captura */}
-                    {isSessionEnded && sessionReport ? (
-                        <div className="flex justify-center flex-col w-full items-center gap-12">
+                    {!isRecording && isSessionEnded && sessionReport ? (
+                        <div className="flex justify-center flex-col w-full items-center gap-6">
                             {/* informe */}
-                            <p>Total de estudiantes: {Math.max(sessionReport?.totalPeople) || 0}</p>
-                            <p>Tiempo de sesión: {formatTime(sessionTime)}</p>
-                            <div className="w-full flex flex-col justify-center items-center">
-                                <p>Promedio de Engagment</p>
+                            <div className="flex gap-1 flex-col items-center font-semibold w-full text-center py-4 px-1 shadow-sm border border-gray-200 rounded-lg">
+                                <p>{getSelectedSectionName()}</p>
+                                <span className="w-full h-0.5  bg-slate-100"></span>
+                                <p>{getSelectedClassName()}</p>
+                            </div>
+                            <div className="flex gap-2 flex-col items-center font-semibold w-full text-center py-4 px-1 shadow-sm border border-gray-200 rounded-lg">
+                                <p>Total de estudiantes: {Math.max(sessionReport?.totalPeople) || 0}</p>
+                                <p>Tiempo de sesión: {formatTime(sessionTime)}</p>
+                            </div>
+                            <div className="w-full gap-2 items-start flex flex-col justify-center py-4 px-1 shadow-sm border border-gray-200 rounded-lg">
+                                <p className="font-semibold">Promedio de Engagment</p>
                                 <div className=" w-full bg-gray-200 rounded-full h-5 dark:bg-gray-700">
                                     <div className=" bg-blue-400 flex text-center h-5 rounded-full dark:bg-blue-500 items-center" style={{ width: `${promedioFinal}%` }}>
                                         <span className="font-bold text-gray-1 w-full">{promedioFinal}%</span>
                                     </div>
                                 </div>
+                                
                             </div>
-                            <div className="flex flex-col items-center gap-2 font-bold">
+                            <div className="w-full flex flex-col items-center gap-2 font-bold py-4 px-1 shadow-sm border border-gray-200 rounded-lg">
                                 <p>Historial de Engagment</p>
                                 <LineGraph />
                             </div>

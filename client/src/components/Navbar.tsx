@@ -39,8 +39,7 @@ const Navbar = () => {
         if (metrics?.stateCounts?.Frustrated > 10 && !toastShown && isRecording) {
             toast.warning('¡Hay 10 o más estudiantes frustrados!');
             setToastShown(true);
-
-            setTimeout(() => setToastShown(false), 3000);
+            setTimeout(() => setToastShown(false), 10000);
         }
     }, [metrics, toastShown]);
     // Temporizador para la grabación
@@ -57,11 +56,13 @@ const Navbar = () => {
 
         return () => clearInterval(interval!);
     }, [isRecording]);
+
     //Realiza un POST hacia el server de express para cambiar el estado del stream
     const setVideoStream = async () => {
         try {
             const response = await fetch('http://localhost:5000/api/setVideoStream', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -80,11 +81,14 @@ const Navbar = () => {
     const startRecording = async () => {
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
+            setVideoStream();//Establece video en flask
         }else {
             setSessionTime(timer);
+            
         }
+        
         handleRecording(); // Cambia el estado de grabación
-        setVideoStream()//Establece video en flask
+        
     };
     // Formatea el tiempo en minutos y segundos
     const formatTime = (time: number) => {
@@ -94,7 +98,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center">
+        <nav className="w-full bg-gray-300 text-white p-4 z-10 flex justify-between items-center shadow-xl">
             <div className="flex space-x-4 md:text-sm xl:text-base">
                 <div className="bg-white text-black shadow-md p-2 rounded sm:w-20 md:w-32">
                     <span className="block">Frustrated: {metrics?.stateCounts?.Frustrated || 0}</span>
@@ -146,7 +150,12 @@ const Navbar = () => {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Link href="/" onClick={logout} className="text-neutral-900">
+                                <Link href="#" className="text-neutral-900">
+                                    Historial de Sesiones
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Link href="/" onClick={logout} className="text-red-600">
                                     Cerrar Sesión
                                 </Link>
                             </DropdownMenuItem>

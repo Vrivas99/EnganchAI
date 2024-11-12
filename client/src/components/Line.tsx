@@ -1,11 +1,10 @@
 'use client'
-import React from 'react'
+import React from 'react';
 import { Chart, Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
-    ChartOptions,
     PointElement,
     LineElement,
     Title,
@@ -15,7 +14,6 @@ import {
 } from 'chart.js';
 
 import { useMetrics } from "@/context/MetricsContext";
-import { useRecording } from "@/context/RecordingContext";
 
 ChartJS.register(
     CategoryScale,
@@ -24,16 +22,16 @@ ChartJS.register(
     LineElement,
     Title,
     Tooltip,
-    Legend);
+    Legend
+);
 
 const LineGraph = () => {
     const { engagedHistory, sessionReport } = useMetrics();
 
-    // Verifica si hay personas totales para evitar valores undefined o divisiones por 0
-    const totalPeople = sessionReport?.totalPeople ?? 1; // Usa 1 como fallback si es undefined o 0.
+    const totalPeople = sessionReport?.totalPeople ?? 1;
 
-    // label muestra el contador de personas con engaged
-    const labels = engagedHistory.map((entry, index) => entry.engagedCount);
+    // Usa los índices para representar segundos y multiplica si necesitas otro intervalo de tiempo
+    const labels = engagedHistory.map((_, index) => index * 1); // Usamos segundos
 
     const data = {
         labels: labels,
@@ -41,15 +39,13 @@ const LineGraph = () => {
             {
                 label: 'Engaged (%)',
                 data: engagedHistory.map((entry) => {
-                    // Calcula el promedio de engagement
                     const engagedPercentage = (entry.engagedCount / totalPeople) * 100;
-                    // Limita el valor entre 0 y 100
                     return Math.min(Math.max(engagedPercentage, 0), 100);
                 }),
                 fill: true,
                 backgroundColor: 'rgb(75, 192, 192)',
                 borderColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.4, // Hace que la curva sea un poco más suave
+                tension: 0.4,
             },
         ],
     };
@@ -58,29 +54,40 @@ const LineGraph = () => {
         scales: {
             y: {
                 beginAtZero: true,
-                max: 100, // Asegura que el eje Y no supere el 100%
+                max: 100,
                 title: {
                     display: true,
                     text: 'Engaged (%)',
                 },
             },
             x: {
-                autoSkip: true,
-                autoSkipPadding: 100,
                 title: {
                     display: true,
-                    text: 'Cantidad alumnos', // Muestra el tiempo en el eje X
+                    text: 'Tiempo (s,m,h)',
+                },
+                ticks: {
+                    callback: function (value: string |number) {
+                        const seconds = value as number;
+                        const hours = Math.floor(seconds / 3600);
+                        const minutes = Math.floor((seconds % 3600) / 60);
+                        const remainingSeconds = seconds % 60;
 
+                        if (hours > 0) {
+                            return `${hours}h ${minutes}m`;
+                        } else if (minutes > 0) {
+                            return `${minutes}m ${remainingSeconds}s`;
+                        }
+                        return `${remainingSeconds}s`;
+                    },
                 },
             },
         },
         plugins: {
             tooltip: {
                 callbacks: {
-                    // Cuando se posa el mouse, se muestra el promedio de engagement correctamente
                     label: function (tooltipItem: TooltipItem<'line'>) {
                         const value = tooltipItem.raw as number;
-                        return `Engaged (%): ${value?.toFixed(2)}`; // Usamos toFixed para mostrar solo 2 decimales
+                        return `Engaged (%): ${value?.toFixed(2)}`;
                     },
                 },
             },
