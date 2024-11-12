@@ -39,8 +39,7 @@ const Navbar = () => {
         if (metrics?.stateCounts?.Frustrated > 10 && !toastShown && isRecording) {
             toast.warning('¡Hay 10 o más estudiantes frustrados!');
             setToastShown(true);
-
-            setTimeout(() => setToastShown(false), 3000);
+            setTimeout(() => setToastShown(false), 10000);
         }
     }, [metrics, toastShown]);
     // Temporizador para la grabación
