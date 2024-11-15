@@ -33,7 +33,7 @@ metricsAPI = {}#Metricas que se enviaran al frontend, copiara el contenido de "m
 
 #DAISEE
 daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
-minConfidence = 0.3#umbral minimo de confianza
+minConfidence = 0.0#0.3#umbral minimo de confianza
 
 #Cargar modelos
 #Verificar la existencia de una GPU para usar cuda
@@ -54,7 +54,7 @@ else:
     engagementModel = tf.keras.models.load_model(engagementModelName)
 
 #Cargar mmodelo de Yolo
-yoloModel = YOLO('yolov8n-face.pt')# #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
+yoloModel = YOLO('best.pt')#yolov8n-face.pt # #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
 #device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible (SOLO CUDA)
 yoloModel = yoloModel.to('cpu')#device
 
@@ -63,9 +63,9 @@ personIdCounter = 1
 activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
 #Datos de la camara
-camLink = "TestVideos/7.mp4"
+camLink = "TestVideos/7.mp4"#"rtsp://rtsp:Aa5DdOnS@192.168.100.84:554/av_stream/ch0"
 cap = None
-processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
+processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
 fpsTarget = 24#Cantidad de fps que se quiere procesar
@@ -155,6 +155,78 @@ def receiveStream():
 
         q2.put(frame)#displayStream()
 
+#Debido a las pruebas del modelo, fuimos utilizando diferentes variantes, esta funcion permite cambiar entre cada una rapidamente
+def modelProcess(mode=0,detection=None,frame=None,cords=None):
+    returnData =[]#Devuelve el estado de engagement y las probabilidades de cada uno
+
+    match(mode):
+        case 0:#Utilizando yolo+modelo keras
+            #Es mas entendible definir las coordenadas en variables
+            x1 = cords[0]
+            y1 = cords[1]
+            x2 = cords[2]
+            y2 = cords[3]
+
+            if frame == None:
+                return False
+
+            face = frame[y1:y2, x1:x2]
+            #Prediccion con un modelo keras (.h5,.keras)
+            if face.size == 0:#Si el tamaño de algun rostro detectado es 0, saltar al siguiente frame
+                return False
+                #continue
+
+            faceResized = cv2.resize(face, (224, 224))
+            faceArray = np.expand_dims(faceResized, axis=0) / 255.0
+
+            #Prediccion de estado
+            if isCudaAvailable():
+                with tf.device('/GPU:0'):
+                    engagementPrediction = engagementModel.predict(faceArray)
+            else:
+                engagementPrediction = engagementModel.predict(faceArray)
+
+            if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
+                predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
+                predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
+
+                #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
+                if predictedProbabilities >= minConfidence:
+                    engagementState = daiseeLabels[predictedIndex]
+                else:
+                    #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
+                    return False
+                    #continue
+                    
+                #Obtener los estados resagados
+                #otherIndex = [i for i in range(len(daiseeLabels)) if i != predictedIndex]
+                #otherLabels = [(daiseeLabels[i], engagementPrediction[0][i]) for i in otherIndex]
+
+                returnData.append(engagementState)#Estado
+                returnData.append(round(predictedProbabilities*100))#Confianza, es un decimal, se transforma directamente a porcentual
+                return returnData
+
+                
+
+        case 1:#Utilizando solamente yolo
+            engagementName = ""
+            #daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
+            match(detection.cls[0].item()):
+                case 0:#Attentive
+                    engagementName = daiseeLabels[3]#Engaged
+                case 1:#Distracted
+                    engagementName = daiseeLabels[0]#Frustrated
+                case 2:#Sleepy
+                    engagementName = daiseeLabels[2]#Bored
+            
+            if engagementName != "":
+                returnData.append(engagementName)#Estado
+                returnData.append(round(detection.conf[0].item()*100))#Confianza, es un decimal, se transforma directamente a porcentual
+                return returnData
+        
+    #si llega a este punto sin un "return returnData", significa que algo paso
+    return False
+
 #Procesar los frames de receive Stream
 def procesStream():
     global metricsAPI, personIdCounter, activePersonIds, frameCount, dataStream, proNextFrame
@@ -177,10 +249,12 @@ def procesStream():
                 #Crear un data temporal para actualizar solo cuando este listo
                 tempData = []
                 # deteccion de objetos de YOLO
-                results = yoloModel.track(frame, persist=True, classes=0)#track y persist=True para asignar id a lo identificado, classes=0 para personas
+                results = yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado
+                
                 metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
+                
+                #Resultados de Yolo
                 if results and len(results[0].boxes) > 0:
-                    #personDetected = False #Resetear verificador de personas por frame
                     #Se resetea el contador de IDs
                     resetIDCounter()
                     for detection in results[0].boxes:
@@ -199,53 +273,34 @@ def procesStream():
                             #Coordenadas para el boundbox
                             x1, y1, x2, y2 = map(int, detection.xyxy[0])
 
-                            face = frame[y1:y2, x1:x2]
-                            if face.size == 0:#Si el tamaño de algun rostro detectado es 0, saltar al siguiente frame
+                            #Procesamiento dependiendo del modelo
+                            processReturn = modelProcess(1,detection,frame,[x1,y1,x2,y2])
+
+                            #Si modelProcess() devuelve false, procesar el siguiente frame
+                            if processReturn == None:
                                 continue
 
-                            faceResized = cv2.resize(face, (224, 224))
-                            faceArray = np.expand_dims(faceResized, axis=0) / 255.0
+                            engagementState = processReturn[0]
+                            predictedProbabilities = processReturn[1]
 
-                            #Prediccion de estado
-                            if isCudaAvailable():
-                                with tf.device('/GPU:0'):
-                                    engagementPrediction = engagementModel.predict(faceArray)
-                            else:
-                                engagementPrediction = engagementModel.predict(faceArray)
+                            #Agregar el contador de estado para metricas
+                            metrics["stateCounts"][engagementState] += 1
+                            #Agregar los ids al json
+                            metrics["Ids"][trackID] = {}#Establecer formato
+                            metrics["Ids"][trackID]["confidence"] = predictedProbabilities
+                            metrics["Ids"][trackID]["state"] = engagementState
 
-                            if engagementPrediction.ndim == 2 and engagementPrediction.shape[1] == len(daiseeLabels):
-                                predictedIndex = np.argmax(engagementPrediction[0])#[0] por que engagementPrediction es un array doble [[x,x,x,x]]
-                                predictedProbabilities = engagementPrediction[0][predictedIndex]#Extraer las probabilidades
-
-                                #Asignar un estado dependiendo del umbral de confianza (si el % de confianza de la prediccion es menor al minimo, se detectara por defecto "Engaged"")
-                                if predictedProbabilities >= minConfidence:
-                                    engagementState = daiseeLabels[predictedIndex]
-                                else:
-                                    #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
-                                    continue
-                                    
-                                #Obtener los estados resagados
-                                otherIndex = [i for i in range(len(daiseeLabels)) if i != predictedIndex]
-                                otherLabels = [(daiseeLabels[i], engagementPrediction[0][i]) for i in otherIndex]
-
-                                #Agregar el contador de estado
-                                metrics["stateCounts"][engagementState] += 1
-                                #Agregar los ids al json
-                                metrics["Ids"][trackID] = {}#Establecer formato
-                                metrics["Ids"][trackID]["confidence"] = round(predictedProbabilities*100)#Temporalmente agrego el porcentaje de probabilidad
-                                metrics["Ids"][trackID]["state"] = engagementState
-
-                                #Pasar resultados de cada rostro
-                                tempData.append({
-                                    "trackID":trackID,
-                                    "x1": x1,
-                                    "y1": y1,
-                                    "x2": x2,
-                                    "y2": y2,
-                                    "engagementState": engagementState,
-                                    "predictedProbabilities": predictedProbabilities,
-                                    "otherLabels": otherLabels
-                                })
+                            #Pasar resultados de cada rostro
+                            tempData.append({
+                                "trackID":trackID,
+                                "x1": x1,
+                                "y1": y1,
+                                "x2": x2,
+                                "y2": y2,
+                                "engagementState": engagementState,
+                                "predictedProbabilities": predictedProbabilities#,
+                                #"otherLabels": "b"
+                            })
 
                 #Actualizar las metricas solo cuando se haya terminado de procesar el frame
                 metricsAPI = copy.deepcopy(metrics)
@@ -269,7 +324,7 @@ def displayStream():
                     y2 = dataStream[i]["y2"]
                     trackID = dataStream[i]["trackID"]
                     predictedProbabilities = dataStream[i]["predictedProbabilities"]
-                    otherLabels = dataStream[i]["otherLabels"]
+                    #otherLabels = dataStream[i]["otherLabels"]
 
                     #Seleccionar el color correspondiente
                     color = colorList.get(engagementState, (255, 255, 255))  # Blanco por defecto si no se encuentra
@@ -279,11 +334,12 @@ def displayStream():
 
                     #Texto de estado + % de probabilidad
                     #cv2.putText(frame, f'ID: {trackID} | {engagementState} %{round(predictedProbabilities*100)}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                    drawCv2Text(frame,f'{trackID} | {engagementState[0:1]} %{round(predictedProbabilities*100)}',(x1, y1 - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,color,(255,255,255),1)
+                    drawCv2Text(frame,f'{trackID} | {engagementState[0:1]} %{predictedProbabilities}',(x1, y1 - 10),cv2.FONT_HERSHEY_SIMPLEX,0.5,color,(0,0,0),1)
+                    
                     #Textos de estados resagados (abajo)
-                    drawCv2Text(frame,
-                        f'{otherLabels[0][0][0:1]} %{round(otherLabels[0][1]*100)}, {otherLabels[1][0][0:1]} %{round(otherLabels[1][1]*100)},{otherLabels[2][0][0:1]} %{round(otherLabels[2][1]*100)}'
-                        ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
+                    #drawCv2Text(frame,
+                     #   f'{otherLabels[0][0][0:1]} %{round(otherLabels[0][1]*100)}, {otherLabels[1][0][0:1]} %{round(otherLabels[1][1]*100)},{otherLabels[2][0][0:1]} %{round(otherLabels[2][1]*100)}'
+                      #  ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
 
                 #region Enviar los frames a la pantalla
 
@@ -384,4 +440,4 @@ if __name__ == "__main__":
     p2.start()
     p3.start()
     #Abrir servidor de flask
-    app.run(host='127.0.0.1', port=5001, debug=False)
+    app.run(host='localhost', port=5001, debug=False)
