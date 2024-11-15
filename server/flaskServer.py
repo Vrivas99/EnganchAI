@@ -63,9 +63,9 @@ personIdCounter = 1
 activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
 #Datos de la camara
-camLink = "TestVideos/7.mp4"#"rtsp://rtsp:Aa5DdOnS@192.168.100.84:554/av_stream/ch0"
+camLink = "TestVideos/7.mp4"
 cap = None
-processVideo = True#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
+processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
 
 #Reducir la carga de la CPU haciendo ajustes en la transmision
 fpsTarget = 24#Cantidad de fps que se quiere procesar
@@ -369,6 +369,10 @@ def setCamLink():
     try:
         data = request.get_json()
         camLink = data.get('camLink')
+
+        #Si el link es para utilizar la webcam, cambiar string a int
+        if camLink == "0": camLink = 0
+
         print(f"Link de cámara recibido: {camLink}")
         return jsonify({"status": "success", "newLink": camLink}), 200
     except (ValueError, TypeError):
