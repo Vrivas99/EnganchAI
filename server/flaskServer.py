@@ -381,7 +381,7 @@ def setCamLink():
         camLink = tempValue
 
         print(f"Link de cámara recibido={camLink}")
-        if isinstance(tempValue, (int, float)):
+        if isinstance(camLink, (int, float)):
             print("Link de la camara es webcam")
         return jsonify({"status": "success", "newLink": camLink}), 200
     except (ValueError, TypeError):
