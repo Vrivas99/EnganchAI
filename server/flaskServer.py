@@ -253,8 +253,8 @@ def procesStream():
                 # deteccion de objetos de YOLO
                 results = yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado
                 
-                #Esto comprobaba los resultados de yolo, pero ya no es viable; sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
-                metrics["totalPeople"] = sum(metrics["stateCounts"].values())
+                #Esto comprobaba los resultados de yolo, pero ya no es viable; 
+                #metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
                 
                 #Resultados de Yolo
                 if results and len(results[0].boxes) > 0:
@@ -305,6 +305,8 @@ def procesStream():
                                 #"otherLabels": "b"
                             })
 
+                #Contar la cantidad total de personas registradas
+                metrics["totalPeople"] = sum(metrics["stateCounts"].values())
                 #Actualizar las metricas solo cuando se haya terminado de procesar el frame
                 metricsAPI = copy.deepcopy(metrics)
                 #Permitir recibir el siguiente frame
@@ -319,6 +321,12 @@ def displayStream():
             if q2.empty() !=True:
                 frame=q2.get()#Recibir los frames de "receiveStream"
                 for i in range(len(dataStream)):
+                    if i >= len(dataStream):
+                        print("//////////BREAK PARA EVITAR ERROR//////////")
+                        break
+                    #print("LenData=",len(dataStream))
+                    #print("I=",i)
+                    #print("DataStream[i]=",dataStream[i])
                     #Es mas legible crear variables locales que poner todo el listado como argumento
                     engagementState = dataStream[i]["engagementState"]
                     x1 = dataStream[i]["x1"]

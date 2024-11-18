@@ -52,9 +52,11 @@ async function metrics(req, res) {
 
         currentMetrics = response.data;//Metricas recibidas/actuales
 
+        console.log("Metrics express",currentMetrics)
+
         //ALmacenar metricas de la sesion cada X segundos
         if (currentSecond - lastStoredSecond >= storeFrequency) {
-            console.log("SessionMetrics push")
+            //console.log("SessionMetrics push")
             sessionMetrics.push({
                 second: currentSecond,
                 totalPeople: response.data.totalPeople,
