@@ -42,16 +42,18 @@ def isCudaAvailable():
     return any(device.device_type == 'GPU' for device in localDeviceProtos)
 
 #Cargar modelo de Engagement
-engagementModelName = "modelo_cnn_knn.h5"
+engagementModelName = None#"modelo_cnn_knn.h5"
 engagementModel = None#tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
-if isCudaAvailable():
-    print("CUDA disponible, cargado modelo en GPU")
-    with tf.device('/GPU:0'):
+#Cargarlo en gpu o cpu (si no es None)
+if engagementModelName != None:
+    if isCudaAvailable():
+        print("CUDA disponible, cargado modelo en GPU")
+        with tf.device('/GPU:0'):
+            engagementModel = tf.keras.models.load_model(engagementModelName)
+            #engagementModel = tf.saved_model.load(engagementModelName)
+    else:
+        print("CUDA no esta disponible, cargado modelo en CPU")
         engagementModel = tf.keras.models.load_model(engagementModelName)
-        #engagementModel = tf.saved_model.load(engagementModelName)
-else:
-    print("CUDA no esta disponible, cargado modelo en CPU")
-    engagementModel = tf.keras.models.load_model(engagementModelName)
 
 #Cargar mmodelo de Yolo
 yoloModel = YOLO('best.pt')#yolov8n-face.pt # #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
