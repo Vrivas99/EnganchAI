@@ -253,7 +253,8 @@ def procesStream():
                 # deteccion de objetos de YOLO
                 results = yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado
                 
-                metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
+                #Esto comprobaba los resultados de yolo, pero ya no es viable; sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
+                metrics["totalPeople"] = sum(metrics["stateCounts"].values())
                 
                 #Resultados de Yolo
                 if results and len(results[0].boxes) > 0:
@@ -370,10 +371,18 @@ def setCamLink():
 
     try:
         data = request.get_json()
-        camLink = data.get('camLink')
-        if camLink == "0": camLink = 0
+        tempValue = ""
+        tempValue = data.get('camLink')
         
-        print(f"Link de cámara recibido: {camLink}")
+        #Detecta si tempValue es un numero para usarlo como webcam
+        if tempValue.isdigit():
+            tempValue = int(tempValue)
+            
+        camLink = tempValue
+
+        print(f"Link de cámara recibido={camLink}")
+        if isinstance(tempValue, (int, float)):
+            print("Link de la camara es webcam")
         return jsonify({"status": "success", "newLink": camLink}), 200
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid value"}), 400
