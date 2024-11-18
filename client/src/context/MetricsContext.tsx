@@ -49,10 +49,10 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
     const [isSessionEnded, setIsSessionEnded] = useState(false);
     const [sessionReport, setSessionReport] = useState<MetricsResponse | null>(null);
     const { isRecording } = useRecording(); // Usar isRecording desde el RecordingContext
-    
+
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
-    
+
         if (isRecording) {
             const fetchMetrics = async () => {
                 try {
@@ -60,13 +60,15 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
                         headers: { 'Content-Type': 'application/json' },
                     });
                     const data = await response.json();
-                    
+
                     if (data && data.Ids && data.stateCounts && data.totalPeople) {
                         setMetrics(data);
                         // Guardar datos de engaged a lo largo del tiempo
                         setEngagedHistory((prev) => [
-                            ...prev, 
-                            { engagedCount: data.stateCounts.Bored }
+                            ...prev,
+                            {
+                                engagedCount: data.stateCounts.Engaged,
+                            }
                         ]);
                     }
                 } catch (error) {
@@ -77,20 +79,20 @@ export const MetricsProvider = ({ children }: { children: ReactNode }) => {
         } else if (!isRecording && metrics) {
             setSessionReport(metrics); // Se establece el reporte final al detener la grabación
             setIsSessionEnded(true);
-            
+
         }
-    
+
         return () => clearInterval(interval!);
     }, [isRecording]);
 
     const clearEngagedHistory = () => {
         setEngagedHistory([]);
     };
-    
-    
+
+
 
     return (
-        <MetricsContext.Provider value={{ metrics,engagedHistory, clearEngagedHistory, isSessionEnded, sessionReport }}>
+        <MetricsContext.Provider value={{ metrics, engagedHistory, clearEngagedHistory, isSessionEnded, sessionReport }}>
             {children}
         </MetricsContext.Provider>
     );
