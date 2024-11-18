@@ -212,7 +212,11 @@ def modelProcess(mode=0,detection=None,frame=None,cords=None):
 
         case 1:#Utilizando solamente yolo
             engagementName = ""
-            #daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
+            predictedProbabilities = detection.conf[0].item()
+            #Si las confiabilidd es menor al minimo, return False
+            if predictedProbabilities < minConfidence:
+                return False
+
             match(detection.cls[0].item()):
                 case 0:#Attentive
                     engagementName = daiseeLabels[3]#Engaged
@@ -223,7 +227,7 @@ def modelProcess(mode=0,detection=None,frame=None,cords=None):
             
             if engagementName != "":
                 returnData.append(engagementName)#Estado
-                returnData.append(round(detection.conf[0].item()*100))#Confianza, es un decimal, se transforma directamente a porcentual
+                returnData.append(round(predictedProbabilities*100))#Confianza, es un decimal, se transforma directamente a porcentual
                 return returnData
         
     #si llega a este punto sin un "return returnData", significa que algo paso
@@ -280,7 +284,7 @@ def procesStream():
                             processReturn = modelProcess(1,detection,frame,[x1,y1,x2,y2])
 
                             #Si modelProcess() devuelve false, procesar el siguiente frame
-                            if processReturn == None:
+                            if processReturn == False:
                                 continue
 
                             engagementState = processReturn[0]
