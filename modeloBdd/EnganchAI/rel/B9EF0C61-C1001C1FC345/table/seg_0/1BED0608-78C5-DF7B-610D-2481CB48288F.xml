@@ -31,6 +31,17 @@
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
+<Column name="Promedio" id="842221E9-364A-2B74-F418-B871EC20D68C">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-11-14 14:16:43 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypeScale>3</dataTypeScale>
+<ownDataTypeParameters>,,3</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
 <Column name="Fecha" id="528AF8EC-92C0-7A82-94F4-8351CAD4B2CE">
 <createdBy>Jordan</createdBy>
 <createdTime>2024-10-21 13:07:29 UTC</createdTime>

@@ -58,7 +58,7 @@ async function metrics(req, res) {
             sessionMetrics.push({
                 second: currentSecond,
                 totalPeople: response.data.totalPeople,
-                engagedCount: response.data.stateCounts.Engaged || 0
+                engagedCount: response?.data?.stateCounts?.Engaged || 0
             });
 
             lastStoredSecond = currentSecond;//Actualiza ultimo segundo almacenado

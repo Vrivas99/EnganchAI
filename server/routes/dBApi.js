@@ -38,7 +38,6 @@ router.get('/getUserAsignation', authMid.validateToken, dbController.getUserAsig
 //Realiza el login
 router.post('/login', dbController.login);
 
-
 //Registrar un usuario (De momento, utilizar postman)
 router.post('/register', upload.single('avatar'), dbController.register);
 
@@ -53,5 +52,8 @@ router.post('/storeSessionMetrics', dbController.storeSessionMetrics);
 
 //Recoger las metricas de una sesion por asignacion
 router.post('/getAsignationMetrics', dbController.getAsignationMetrics);
+
+//Recoger el promedio de engagement semanal usando el id de asignacion
+router.post('/getAVGWeeklyEngagement', dbController.getAVGWeeklyEngagement)
 
 module.exports = router;

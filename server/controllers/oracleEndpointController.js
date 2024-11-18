@@ -205,11 +205,11 @@ async function getCameraLink(req,res){
 async function storeSessionMetrics(req,res){
     try{
         const { metrics, Asignacion } = req.body;  //Recibe los datos enviados desde flask.js
-
+        
         const oracle = await getDBConnection();
         const result = await oracle.execute(
-            'INSERT INTO METRICAS (IDMETRICA, REGISTRO, ASIGNACIONES_IDASIGNACION) VALUES (:idMetrica, :jsonData, :idAsignacion)',
-            { idMetrica: 0, jsonData: metrics, idAsignacion: Asignacion}, //idMetrica = 0 para ser tomado por el trigger de oracle
+            'INSERT INTO METRICAS (IDMETRICA, REGISTRO, PROMEDIO, ASIGNACIONES_IDASIGNACION) VALUES (:idMetrica, :jsonData, :avgData, :idAsignacion)',
+            { idMetrica: 0, jsonData: metrics, avgData: metrics.AVG, idAsignacion: Asignacion}, //idMetrica = 0 para ser tomado por el trigger de oracle
             { autoCommit: true }//Asegura el commit
         );
 
@@ -252,6 +252,24 @@ async function getAsignationMetrics(req,res){
     }
 };
 
+async function getAVGWeeklyEngagement(req,res){
+    try{
+        const Asignacion = req.body.asignacion;
+
+        const oracle = await getDBConnection();
+        const result = await oracle.execute(
+            "SELECT AVG(PROMEDIO) AS PROMEDIO FROM METRICAS WHERE ASIGNACIONES_IDASIGNACION=:idAsignacion AND FECHA BETWEEN TRUNC(SYSDATE, 'IW') AND SYSDATE",
+            { idAsignacion: Asignacion}, 
+            { outFormat: oracledb.OBJECT }
+        );
+
+        res.status(200).json({ message: 'RESULT:', data: result.rows[0] });
+    } catch(err){
+        console.error('Error details:', err);
+        res.status(500).json({ error: 'Error al hacer la solicitud', message: err.message });
+    }
+};
+
 module.exports = {
     getUserData,
     getUserConfidence,
@@ -261,5 +279,6 @@ module.exports = {
     UpdateUserConfidence,
     getCameraLink,
     storeSessionMetrics,
-    getAsignationMetrics
+    getAsignationMetrics,
+    getAVGWeeklyEngagement
 };
