@@ -1,4 +1,4 @@
-#Instalar paquetes con "pip install -r requirements.txt"
+#Librerias
 from flask import Flask, Response, jsonify, request
 import cv2
 import numpy as np
@@ -7,15 +7,12 @@ from tensorflow.python.client import device_lib#Importar Usos de CUDA
 from ultralytics import YOLO
 import copy#Para copiar las metricas
 from collections import defaultdict#Para almacenar las id's
-#Cargar usuario y contraseña de la camara
-#from dotenv import load_dotenv
-#import os
-#Crear multiprocesos para no saturar las funciones
-import queue
-#Crear queue para pasar los frames entre multiprocesos
+import threading#Se usa hilos para levantar cada funcion (o si no el servidor de flask se saturara)
+import queue#Crear queue para pasar los frames entre multiprocesos
+
 q=queue.Queue(maxsize=1)#procesStream()
 q2=queue.Queue(maxsize=2)#displayStream()
-import threading
+
 
 app = Flask(__name__)
 
@@ -34,16 +31,14 @@ metricsAPI = {}#Metricas que se enviaran al frontend, copiara el contenido de "m
 #DAISEE
 daiseeLabels = ["Frustrated", "Confused", "Bored", "Engaged"]
 minConfidence = 0.0#0.3#umbral minimo de confianza
-
 #Cargar modelos
 #Verificar la existencia de una GPU para usar cuda
 def isCudaAvailable():
     localDeviceProtos = device_lib.list_local_devices()
     return any(device.device_type == 'GPU' for device in localDeviceProtos)
-
 #Cargar modelo de Engagement
 engagementModelName = None#"modelo_cnn_knn.h5"
-engagementModel = None#tf.keras.models.load_model("modelo_cnn_knn.h5") #Modelo cnn
+engagementModel = None#Modelo cnn que se cargara segun "engagementModelName"
 #Cargarlo en gpu o cpu (si no es None)
 if engagementModelName != None:
     if isCudaAvailable():
@@ -55,20 +50,20 @@ if engagementModelName != None:
         print("CUDA no esta disponible, cargado modelo en CPU")
         engagementModel = tf.keras.models.load_model(engagementModelName)
 
-#Cargar mmodelo de Yolo
+
+#Cargar modelo de YOLO
 yoloModel = YOLO('best.pt')#yolov8n-face.pt # #Modelo yolo, cambiar a yolov8n-face.pt si solo se quiere detectar rostros
-#device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible (SOLO CUDA)
+#device = 'cuda' if torch.cuda.is_available() else 'cpu' #Cargar el modelo en la GPU si esta disponible (SOLO SI ESTA CUDA, SI NO DARA ERROR)
 yoloModel = yoloModel.to('cpu')#device
 
-#Contador de ID's
+#Contador de ID's personalizado (yolo no reutiliza id, por lo que iran escalando con la transmision)
 personIdCounter = 1
 activePersonIds = {}#Relación entre yoloTrackID y customPersonID
 
-#Datos de la camara
-camLink = "TestVideos/7.mp4"
+#Datos de la Transmision
+camLink = ""
 cap = None
 processVideo = False#Determina si el video se procesara o no (SI SOLO SE LEVANTARA EL SERVIDOR, DEBE ESTAR EN TRUE)
-
 #Reducir la carga de la CPU haciendo ajustes en la transmision
 fpsTarget = 24#Cantidad de fps que se quiere procesar
 frameCount = 0
@@ -77,16 +72,13 @@ fpsStream = 0#FPS de la transmision
 #Resolucion del stream
 resWidth = 1920
 resHeight = 1080
-
 #Pasar datos entre process y display stream
 dataStream = []
 proNextFrame = True#Intenta poner al dia a procesStream
 
-#Cuando salga este print, el servidor flask habra iniciado por completo
+#Print auxiliares, indican la version de tensorflow y la cantidad de gpus disponibles (sirve para saber si cuda esta disponible)
 print("Tf version=",tf.__version__)
 print("Num GPUs Available=", len(tf.config.list_physical_devices('GPU')))
-print("\n///////\nstream in http://127.0.0.1:5001/videoFeed \n Metrics: http://127.0.0.1:5001/metrics \n///////\n")
-
 
 #Limpiar el contador de ID cuando no se detecten mas personas en un frame
 def resetIDCounter():
@@ -139,25 +131,18 @@ def receiveStream():
             initCV2(True)
             continue
 
-        #Poner los fps del stream en la imagen a enviar
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        fpsStream = fps
-
-        #FPS del stream
-        #cv2.putText(frame, f'FPS: {fps}', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, [0,0,0], 2)
-
         ##Redimensionar el frame si no cumple con la resolucion deseada
         if (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) != resWidth and int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) != resHeight):
             frame = cv2.resize(frame, (resWidth, resHeight))
         
         #Enviar los frames a...
-        if proNextFrame and not q.full():
+        if proNextFrame and not q.full():#Solo analiza el ultimo frame recibido despues de que yolo haya analizado el anterior
             q.put_nowait(frame)#procesStream()
             proNextFrame = False
 
         q2.put(frame)#displayStream()
 
-#Debido a las pruebas del modelo, fuimos utilizando diferentes variantes, esta funcion permite cambiar entre cada una rapidamente
+#Debido a las pruebas del modelo, fuimos utilizando diferentes variantes, esta funcion permite cambiar entre cada una rapidamente (keras o yolo pre-entrenado)
 def modelProcess(mode=0,detection=None,frame=None,cords=None):
     returnData =[]#Devuelve el estado de engagement y las probabilidades de cada uno
 
@@ -175,9 +160,9 @@ def modelProcess(mode=0,detection=None,frame=None,cords=None):
             face = frame[y1:y2, x1:x2]
             #Prediccion con un modelo keras (.h5,.keras)
             if face.size == 0:#Si el tamaño de algun rostro detectado es 0, saltar al siguiente frame
-                return False
-                #continue
+                return False#Return false es equivalente a continue, ver en procesStream()
 
+            #Se redimensiona los frames al shape requerido por el modelo keras (depende de lo establecido en el entrenamiento)
             faceResized = cv2.resize(face, (224, 224))
             faceArray = np.expand_dims(faceResized, axis=0) / 255.0
 
@@ -197,18 +182,15 @@ def modelProcess(mode=0,detection=None,frame=None,cords=None):
                     engagementState = daiseeLabels[predictedIndex]
                 else:
                     #Si no cumplio el umbral de confianza, continuar al siguiente frame y no dibujar el boundbox
-                    return False
-                    #continue
+                    return False#Return false es equivalente a continue, ver en procesStream()
                     
-                #Obtener los estados resagados
+                #Obtener los estados resagados (deprecado, pero lo dejo por si acaso)
                 #otherIndex = [i for i in range(len(daiseeLabels)) if i != predictedIndex]
                 #otherLabels = [(daiseeLabels[i], engagementPrediction[0][i]) for i in otherIndex]
 
                 returnData.append(engagementState)#Estado
                 returnData.append(round(predictedProbabilities*100))#Confianza, es un decimal, se transforma directamente a porcentual
                 return returnData
-
-                
 
         case 1:#Utilizando solamente yolo
             engagementName = ""
@@ -230,7 +212,7 @@ def modelProcess(mode=0,detection=None,frame=None,cords=None):
                 returnData.append(round(predictedProbabilities*100))#Confianza, es un decimal, se transforma directamente a porcentual
                 return returnData
         
-    #si llega a este punto sin un "return returnData", significa que algo paso
+    #si llega a este punto sin un "return returnData", significa que no se pudo procesar el frame... continue
     return False
 
 #Procesar los frames de receive Stream
@@ -241,7 +223,6 @@ def procesStream():
             if q.empty() !=True:
                 frame=q.get()#Recibir los frames de "receiveStream"
                 print("PS get frame")
-                #region procesar frames en yolo
                 frameCount = 0
                 
                 #Establecer metricas locales
@@ -249,17 +230,11 @@ def procesStream():
                 metrics["stateCounts"] = {"Frustrated": 0, "Confused": 0, "Bored": 0, "Engaged": 0}
                 metrics["Ids"] = {}
                 
-                #Mover el frame a GPU/CPU
-                #frameTensor = torch.from_numpy(frame).to(device)
-                
                 #Crear un data temporal para actualizar solo cuando este listo
                 tempData = []
                 # deteccion de objetos de YOLO
                 results = yoloModel.track(frame, persist=True)#track y persist=True para asignar id a lo identificado
-                
-                #Esto comprobaba los resultados de yolo, pero ya no es viable; 
-                #metrics["totalPeople"] = sum(1 for det in results[0].boxes if det.cls[0] == 0) #Contar personas detectadas (para comprobar que la suma de los estados es correcta)
-                
+
                 #Resultados de Yolo
                 if results and len(results[0].boxes) > 0:
                     #Se resetea el contador de IDs
@@ -324,13 +299,12 @@ def displayStream():
         while processVideo:
             if q2.empty() !=True:
                 frame=q2.get()#Recibir los frames de "receiveStream"
+                #Dibujar resultados de q1 sobre los frames de q2
                 for i in range(len(dataStream)):
                     if i >= len(dataStream):
                         print("//////////BREAK PARA EVITAR ERROR//////////")
                         break
-                    #print("LenData=",len(dataStream))
-                    #print("I=",i)
-                    #print("DataStream[i]=",dataStream[i])
+
                     #Es mas legible crear variables locales que poner todo el listado como argumento
                     engagementState = dataStream[i]["engagementState"]
                     x1 = dataStream[i]["x1"]
@@ -357,7 +331,6 @@ def displayStream():
                       #  ,(x1, y2),cv2.FONT_HERSHEY_SIMPLEX,0.4,color,(255,255,255),1)
 
                 #region Enviar los frames a la pantalla
-
                 #Convertir el frame a jpg
                 ret, buffer = cv2.imencode('.jpg', frame)
                 if not ret:
