@@ -204,12 +204,12 @@ async function getCameraLink(req,res){
 
 async function storeSessionMetrics(req,res){
     try{
-        const { metrics, Asignacion } = req.body;  //Recibe los datos enviados desde flask.js
+        const { metrics, AVG, Asignacion } = req.body;  //Recibe los datos enviados desde flask.js
         
         const oracle = await getDBConnection();
         const result = await oracle.execute(
             'INSERT INTO METRICAS (IDMETRICA, REGISTRO, PROMEDIO, ASIGNACIONES_IDASIGNACION) VALUES (:idMetrica, :jsonData, :avgData, :idAsignacion)',
-            { idMetrica: 0, jsonData: metrics, avgData: metrics.AVG, idAsignacion: Asignacion}, //idMetrica = 0 para ser tomado por el trigger de oracle
+            { idMetrica: 0, jsonData: metrics, avgData: AVG, idAsignacion: Asignacion}, //idMetrica = 0 para ser tomado por el trigger de oracle
             { autoCommit: true }//Asegura el commit
         );
 

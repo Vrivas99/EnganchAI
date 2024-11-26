@@ -8,11 +8,12 @@ let currentSecond = 0;//Segundo actual de la sesion
 const storeFrequency = 1;   //Cada cuantos segundos se almacenaran las metricas
 let lastStoredSecond = 0;//Ultimo segundo que se almaceno las metricas
 
-async function sessionMetricsDB(metric, Asign){
+async function sessionMetricsDB(metric, avg, Asign){
     // Enviar las métricas a /db para almacenarlas en la base de datos
     try {
         await axios.post('http://localhost:5000/db/storeSessionMetrics', {
             metrics: JSON.stringify(metric),//Asegurarse que esten en formato JSON
+            AVG: avg,
             Asignacion: Asign
         });
         console.log('Metricas enviadas a la API');
@@ -41,8 +42,6 @@ async function flaskStream(req, res) {
 
 async function metrics(req, res) {
     try {
-        console.log("get metricas")
-
         //Recoje las metricas desde flask
         const response = await axios({
             url: `http://${flaskIP}/metrics`,
@@ -52,7 +51,7 @@ async function metrics(req, res) {
 
         currentMetrics = response.data;//Metricas recibidas/actuales
 
-        console.log("Metrics express",currentMetrics)
+        //console.log("Metrics express",currentMetrics)
 
         //ALmacenar metricas de la sesion cada X segundos
         if (currentSecond - lastStoredSecond >= storeFrequency) {
@@ -119,7 +118,7 @@ async function setConfidence(req, res) {
 };
 
 async function setVideoStream(req, res) {
-    const { newState, sessionMetrics, Asignation } = req.body;
+    const { newState, history, avg} = req.body;
 
     console.log("set video stream: ",newState)
     try {
@@ -154,7 +153,9 @@ async function setVideoStream(req, res) {
 
         if (newState == false){
             console.log("Metricas de sesion finalizada: ")
-            //sessionMetricsDB(sessionMetrics,Asignation)//Enviar las metricas a /db
+            console.log(history)
+            
+            sessionMetricsDB(history,avg,1)//Enviar las metricas a /db
         }
 
         // Devolver la respuesta a Express

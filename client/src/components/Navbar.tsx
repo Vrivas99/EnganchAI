@@ -27,7 +27,7 @@ const Navbar = () => {
     // Constantes de contexto
     const { isRecording, handleRecording, setSessionTime } = useRecording(); // Usa el estado global
     const {user, logout} = useUser();
-    const { metrics, engagedHistory } = useMetrics();
+    const { metrics, engagedHistory, sessionReport } = useMetrics();
 
     // Estados locales
     const [timer, setTimer] = useState(0);
@@ -60,6 +60,18 @@ const Navbar = () => {
     //Realiza un POST hacia el server de express para cambiar el estado del stream
     const setVideoStream = async () => {
         try {
+            //Calcular promedio de engagement (Solo se enviara a la BD cuando inicie la sesion)
+            const totalPeople = sessionReport?.totalPeople ?? 1;
+            const promedioTotal = engagedHistory.map((entry) => {
+                // Calcula el promedio de engagement
+                const engagedPercentage = (entry.engagedCount / totalPeople) * 100;
+                // Limita el valor entre 0 y 100
+                return Math.min(Math.max(engagedPercentage, 0), 100);
+            });
+            const promedio = promedioTotal.reduce((a, b) => a + b, 0) / promedioTotal.length;
+            //quitar digitos decimales
+            const promedioFinal = promedio.toFixed(2);
+
             const response = await fetch('http://localhost:5000/api/setVideoStream', {
                 method: 'POST',
                 credentials: 'include',
@@ -67,9 +79,10 @@ const Navbar = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ 
-                    newState: !isRecording,
-                    history: engagedHistory
-                }), //Como el estado tarda en cambiar, se envia el contrario
+                    newState: !isRecording,//Como el estado tarda en cambiar, se envia el contrario
+                    history: engagedHistory,
+                    avg: promedioFinal//Promedio de engagement (Calculado ahora)
+                }), 
             });
 
             if (!response.ok) {
@@ -82,9 +95,9 @@ const Navbar = () => {
     };
     // Inicia o finaliza la grabación
     const startRecording = async () => {
+        setVideoStream();//Establece video en flask
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
-            setVideoStream();//Establece video en flask
         }else {
             setSessionTime(timer);
             
