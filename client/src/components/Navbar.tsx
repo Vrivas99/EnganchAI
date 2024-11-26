@@ -27,7 +27,7 @@ const Navbar = () => {
     // Constantes de contexto
     const { isRecording, handleRecording, setSessionTime } = useRecording(); // Usa el estado global
     const {user, logout} = useUser();
-    const { metrics } = useMetrics();
+    const { metrics, engagedHistory } = useMetrics();
 
     // Estados locales
     const [timer, setTimer] = useState(0);
@@ -66,7 +66,10 @@ const Navbar = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ newState: !isRecording }), //Como el estado tarda en cambiar, se envia el contrario
+                body: JSON.stringify({ 
+                    newState: !isRecording,
+                    history: engagedHistory
+                }), //Como el estado tarda en cambiar, se envia el contrario
             });
 
             if (!response.ok) {
