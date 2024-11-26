@@ -153,7 +153,12 @@ const Navbar = () => {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Link href="#" className="text-neutral-900">
+                                <Link href="/video" className="text-neutral-900">
+                                    Ir a stream
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Link href="/history-classes" className="text-neutral-900">
                                     Historial de Sesiones
                                 </Link>
                             </DropdownMenuItem>

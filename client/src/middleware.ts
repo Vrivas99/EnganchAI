@@ -32,5 +32,6 @@ export const config = {
     matcher: [
         '/video/:path*',
         '/select-class/:path*',
+        '/history-classes/:path*',	
     ],
 };
