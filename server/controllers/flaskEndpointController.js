@@ -118,7 +118,7 @@ async function setConfidence(req, res) {
 };
 
 async function setVideoStream(req, res) {
-    const { newState, history, avg} = req.body;
+    const { newState, history, avg, asignation} = req.body;
 
     console.log("set video stream: ",newState)
     try {
@@ -155,7 +155,7 @@ async function setVideoStream(req, res) {
             console.log("Metricas de sesion finalizada: ")
             console.log(history)
             
-            sessionMetricsDB(history,avg,1)//Enviar las metricas a /db
+            sessionMetricsDB(history,avg,asignation)//Enviar las metricas a /db
         }
 
         // Devolver la respuesta a Express

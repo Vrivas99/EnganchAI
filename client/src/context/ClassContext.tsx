@@ -22,6 +22,7 @@ interface ClassContextType {
     fetchCameraLink: () => Promise<void>;
     getSelectedSectionName: () => string;
     getSelectedClassName: () => string;
+    getAssignmentId: () => number | null;
 }
 
 const ClassContext = createContext<ClassContextType | undefined>(undefined);
@@ -51,6 +52,15 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const getSelectedClassName = () => {
         const room = availableRooms.find((room) => room.ID_SALA === Number(selectedClass));
         return room ? room.SALA : '';
+    };
+
+    const getAssignmentId = () => {
+        const assignment = data.find(
+            (asignacion) =>
+                asignacion.ID_SECCION === Number(selectedSection) &&
+                asignacion.ID_SALA === Number(selectedClass)
+        );
+        return assignment ? assignment.IDASIGNACION : null; // Devuelve null si no se encuentra
     };
 
     const fetchUserAssignment = async () => {
@@ -127,6 +137,7 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 fetchCameraLink,
                 getSelectedSectionName,
                 getSelectedClassName,
+                getAssignmentId,
             }}
         >
             {children}

@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import { useRecording } from '@/context/RecordingContext';
 import { useMetrics } from '@/context/MetricsContext';
 import { useUser } from '@/context/UserContext';
+import { useClass } from '@/context/ClassContext';
 
 // Imports de componentes
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +29,7 @@ const Navbar = () => {
     const { isRecording, handleRecording, setSessionTime } = useRecording(); // Usa el estado global
     const {user, logout} = useUser();
     const { metrics, engagedHistory, sessionReport } = useMetrics();
+    const { getAssignmentId } = useClass();
 
     // Estados locales
     const [timer, setTimer] = useState(0);
@@ -72,6 +74,8 @@ const Navbar = () => {
             //quitar digitos decimales
             const promedioFinal = promedio.toFixed(2);
 
+            console.log("ID SE ASIGNACION: ",getAssignmentId())
+
             const response = await fetch('http://localhost:5000/api/setVideoStream', {
                 method: 'POST',
                 credentials: 'include',
@@ -81,7 +85,8 @@ const Navbar = () => {
                 body: JSON.stringify({ 
                     newState: !isRecording,//Como el estado tarda en cambiar, se envia el contrario
                     history: engagedHistory,
-                    avg: promedioFinal//Promedio de engagement (Calculado ahora)
+                    avg: promedioFinal,//Promedio de engagement (Calculado ahora)
+                    asignation: getAssignmentId()//Id asignacion (usuario+seccion+sala)
                 }), 
             });
 
