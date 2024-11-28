@@ -27,23 +27,36 @@ const Navbar = () => {
 
     // Constantes de contexto
     const { isRecording, handleRecording, setSessionTime } = useRecording(); // Usa el estado global
-    const {user, logout} = useUser();
+    const { user, logout } = useUser();
     const { metrics, engagedHistory, sessionReport } = useMetrics();
     const { getAssignmentId } = useClass();
 
     // Estados locales
     const [timer, setTimer] = useState(0);
     const [toastShown, setToastShown] = useState(false);
-    const pathname = usePathname(); // Obtener la ruta actual
+    const pathname = usePathname();
 
-    // Muestra un toast si hay más de 10 estudiantes frustrados
     useEffect(() => {
-        if (metrics?.stateCounts?.Frustrated > 10 && !toastShown && isRecording) {
-            toast.warning('¡Hay 10 o más estudiantes frustrados!');
-            setToastShown(true);
-            setTimeout(() => setToastShown(false), 10000);
-        }
+        // Mapea los mensajes de alerta para cada estado relevante
+        const alertMessages: Record<'Frustrated' | 'Confused' | 'Bored', string> = {
+            Frustrated: '¡Hay 5 o más estudiantes frustrados!',
+            Confused: '¡Hay 5 o más estudiantes confundidos!',
+            Bored: '¡Hay 5 o más estudiantes aburridos!',
+        };
+    
+        // Itera sobre los estados relevantes
+        (Object.entries(alertMessages) as [keyof typeof alertMessages, string][]).forEach(([state, message]) => {
+            const count = metrics?.stateCounts?.[state] || 0;
+            if (count > 5 && !toastShown && isRecording) {
+                toast.warning(message);
+                setToastShown(true);
+                setTimeout(() => setToastShown(false), 10000);
+            }
+        });
     }, [metrics, toastShown]);
+    
+    
+
     // Temporizador para la grabación
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
@@ -74,7 +87,7 @@ const Navbar = () => {
             //quitar digitos decimales
             const promedioFinal = promedio.toFixed(2);
 
-            console.log("ID SE ASIGNACION: ",getAssignmentId())
+            console.log("ID SE ASIGNACION: ", getAssignmentId())
 
             const response = await fetch('http://localhost:5000/api/setVideoStream', {
                 method: 'POST',
@@ -82,12 +95,12 @@ const Navbar = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     newState: !isRecording,//Como el estado tarda en cambiar, se envia el contrario
                     history: engagedHistory,
                     avg: promedioFinal,//Promedio de engagement (Calculado ahora)
                     asignation: getAssignmentId()//Id asignacion (usuario+seccion+sala)
-                }), 
+                }),
             });
 
             if (!response.ok) {
@@ -103,13 +116,13 @@ const Navbar = () => {
         setVideoStream();//Establece video en flask
         if (!isRecording) {
             setTimer(0); // Reinicia el temporizador solo si se inicia una nueva grabación
-        }else {
+        } else {
             setSessionTime(timer);
-            
+
         }
-        
+
         handleRecording(); // Cambia el estado de grabación
-        
+
     };
     // Formatea el tiempo en minutos y segundos
     const formatTime = (time: number) => {
