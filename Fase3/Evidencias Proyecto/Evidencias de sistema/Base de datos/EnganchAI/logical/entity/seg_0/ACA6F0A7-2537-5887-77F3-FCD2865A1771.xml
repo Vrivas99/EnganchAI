@@ -1,0 +1,54 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="ACA6F0A7-2537-5887-77F3-FCD2865A1771" name="SALAS">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 15:46:09 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<engineerTo>
+<item key="B9EF0C61-8AE2-9918-DBAB-C1001C1FC345" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="IdSala" id="344C7269-2BC7-D423-28F7-D5534792DCE8">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 15:48:55 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<engineerTo>
+<item key="B9EF0C61-8AE2-9918-DBAB-C1001C1FC345" value="true"/>
+</engineerTo>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="Link" id="29D31ED2-CA17-B6EC-25E0-F5AAD08BE049">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 15:49:49 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<engineerTo>
+<item key="B9EF0C61-8AE2-9918-DBAB-C1001C1FC345" value="true"/>
+</engineerTo>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="4C720E31-1918-C53B-9CA3-0346BCAEA0A5" name="SALAS PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 15:48:58 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<shouldEngineer>false</shouldEngineer>
+<engineerTo>
+<item key="B9EF0C61-8AE2-9918-DBAB-C1001C1FC345" value="false"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>344C7269-2BC7-D423-28F7-D5534792DCE8</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>
