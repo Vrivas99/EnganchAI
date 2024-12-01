@@ -21,10 +21,12 @@ Este segundo comando inicia el servidor utilizando nodemon, lo que implica que c
 cambios automáticamente.
 
 #Archivos y elementos faltantes#
-la carpeta express contiene algunos elementos importantes que no fueron subidos, la primera es la carpeta wallet de la base de datos de oracle que por razones 
+la carpeta contiene algunos elementos importantes que no fueron subidos, la primera es la carpeta wallet de la base de datos de oracle que por razones 
 obvias no subimos al repositorio ya que son bases de datos personales del equipo de desarrollo. Cuando creen su wallet de su base de datos deberán dejar la wallet 
-descomprimida dentro de la carpeta "express", con el nombre " Wallet_ENGANCHAIWWMTFUA9UICVJPXU" (dentro de la carpeta wallet se deberán encontrar los archivos 
-necesarios como ewallet.pem o similares), si se quiere cambiar el nombre de la wallet deberán cambiar su nombre respectivo en el código del archivo "express/config/dBConnect.js"
+descomprimida dentro de la carpeta, con el nombre " Wallet_ENGANCHAIWWMTFUA9UICVJPXU" (dentro de la carpeta wallet se deberán encontrar los archivos 
+necesarios como ewallet.pem o similares), si se quiere cambiar el nombre de la wallet deberán cambiar su nombre respectivo en el código del archivo "config/dBConnect.js".
+Relacionada con esta también podría ser requerida una carpeta .oci para utilizar un bucket de oracle cloud y subir avatares al registrar un nuevo usuario, dependerá de si 
+el nuevo equipo de desarrollo opine que esta es una funcionalidad útil o no (La carpeta .oci es requerida en el archivo config/ociInit.js)
 
 Ademas de ello hubieron algunas claves del archivo .env que tampoco fueron subidas, siendo estas: DBUSER, DBPASS, DBCONSTRING y DBWALLPASS, las cuales deberán 
 especificar con los nuevos datos de su BDD, siendo estas el usuario de la base de datos, la contraseña del usuario, el string de conexión y la contraseña de la wallet (en ese mismo orden).
