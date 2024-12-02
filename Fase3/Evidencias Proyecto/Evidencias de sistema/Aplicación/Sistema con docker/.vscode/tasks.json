@@ -1,0 +1,52 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run All Servers",
+            "dependsOn": ["Flask Server", "Express Server", "React Frontend"],
+            "type": "shell",
+            "command": "echo Running all servers...",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flask Server",
+            "type": "shell",
+            "command": "python flaskServer.py",
+            "options": {
+            "cwd": "${workspaceFolder}/server/flask"
+            },
+            "presentation": {
+            "reveal": "always",
+            "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Express Server",
+            "type": "shell",
+            "command": "npm start",
+            "options": {
+            "cwd": "${workspaceFolder}/server/express"
+            },
+            "presentation": {
+            "reveal": "always",
+            "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "React Frontend",
+            "type": "shell",
+            "command": "npm run dev",
+            "options": {
+            "cwd": "${workspaceFolder}/client"
+            },
+            "presentation": {
+            "reveal": "always",
+            "panel": "dedicated"
+            },
+            "problemMatcher": []
+        }
+    ]
+  }
+  

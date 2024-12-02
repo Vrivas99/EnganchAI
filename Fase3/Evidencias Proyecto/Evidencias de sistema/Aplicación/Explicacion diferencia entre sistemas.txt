@@ -1,0 +1,6 @@
+NOTA: ambas carpetas contienen el mismo sistema, la diferencia radica en que, al momento de crear las imágenes en docker tuvimos que organizar 
+las carpetas de forma diferente para poder crear imágenes individuales (una para react, una para express y otra para flask), aunque técnicamente, el sistema que tiene 
+más relevancia es "Sistema con docker", pensamos que era relevante subir como evidencia el mismo sistema sin la reorganización de los archivos, sin embargo, se puede comenzar a 
+desarrollar sobre cualquiera de los 2 sistemas (aunque recomendamos trabajar sobre "Sistema con docker", pues si se trabaja sobre "Sistema desarrollo vscode", se tendra 
+que reorganizar los archivos de la misma forma en que se hizo con al carpeta antes mencionada y se tendrán que hacer cambios en el código, "Sistema desarrollo vscode"  
+se subió como único objetivo de ser una evidencia de trabajo)
