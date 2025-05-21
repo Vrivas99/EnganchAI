@@ -1,8 +1,0 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="EnganchAI" id="5F006F07-A38B-CA59-5147-01AEB4345D6D" version="3.5">
-<createdBy>Jordan</createdBy>
-<createdTime>2024-10-02 15:43:40 UTC</createdTime>
-<ownerDesignName>EnganchAI</ownerDesignName>
-<capitalNames>false</capitalNames>
-<designId>5F006F07-A38B-CA59-5147-01AEB4345D6D</designId>
-</OSDM_Design>
