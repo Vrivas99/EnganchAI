@@ -1,0 +1,96 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="1BED0608-78C5-DF7B-610D-2481CB48288F" name="METRICAS">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>1F17C4B6-D0F8-F7B9-9434-A3AFFE40FBC4</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="IdMetrica" id="9B7E0933-8E90-68B0-450C-7D6366CD5B6D">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>F906920D-D5EE-CE86-C198-9C61BAD2B720</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Registro" id="416CC3FD-998A-9F44-219E-E592CF27F930">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>19F3281E-84E2-9BB5-37E0-864F7F781E4E</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>47823B89-BECE-2D4A-B641-EE3BE6149078</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Promedio" id="842221E9-364A-2B74-F418-B871EC20D68C">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-11-14 14:16:43 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypeScale>3</dataTypeScale>
+<ownDataTypeParameters>,,3</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Fecha" id="528AF8EC-92C0-7A82-94F4-8351CAD4B2CE">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-21 13:07:29 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="ASIGNACIONES_idAsignacion" id="77DB14EE-54F3-52D5-9E62-706127E9B300">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:42:33 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="9132EC4D-758F-00AF-BB60-A11FB5A0859E" referredColumn="D2DF91E9-B347-7269-82A6-7459FA2F60C7"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="C2836CE9-468F-4520-FCF9-D266B7259088" name="METRICAS_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>DB485950-784F-14F5-B482-7D06EB98812A</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="9B7E0933-8E90-68B0-450C-7D6366CD5B6D"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="6FA8089F-A442-46FF-258D-1B94293F0C4B" name="METRICAS_ASIGNACIONES_FK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:42:33 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="77DB14EE-54F3-52D5-9E62-706127E9B300"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
