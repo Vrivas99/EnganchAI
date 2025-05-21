@@ -1,0 +1,62 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="3510A0BF-B99E-5B84-1321-4CFA8BB8BEAE" name="SALAS">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>ACA6F0A7-2537-5887-77F3-FCD2865A1771</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<shouldEngineer>false</shouldEngineer>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="IdSala" id="41326A2D-3A46-A2A7-E5C1-A3CD932022EB">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>344C7269-2BC7-D423-28F7-D5534792DCE8</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>5</dataTypePrecision>
+<ownDataTypeParameters>,5,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Nombre" id="658D889E-5EA6-4C82-18C4-C48A0DC6BE2D">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-16 14:45:49 UTC</createdTime>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>10</dataTypeSize>
+<ownDataTypeParameters>10,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="Link" id="5016EFC4-0782-F276-02AD-68EF8AD0A01B">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>29D31ED2-CA17-B6EC-25E0-F5AAD08BE049</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>100</dataTypeSize>
+<ownDataTypeParameters>100,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="C85D71A8-7870-5352-E720-39EAEE877A99" name="SALAS_PK">
+<createdBy>Jordan</createdBy>
+<createdTime>2024-10-02 16:15:31 UTC</createdTime>
+<generatorID>4C720E31-1918-C53B-9CA3-0346BCAEA0A5</generatorID>
+<ownerDesignName>EnganchAI</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="41326A2D-3A46-A2A7-E5C1-A3CD932022EB"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
